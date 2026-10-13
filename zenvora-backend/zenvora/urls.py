@@ -9,4 +9,6 @@ urlpatterns = [
     path('api/shelters/', include('shelters.urls')),
     path('api/shops/', include('shops.urls')),
     path('api/donations/', include('donations.urls')),
+    path('api/notifications/', include('notifications.urls')),
+    path('api/impact/', include('impact.urls')),
 ]

@@ -51,6 +51,16 @@ class DonationViewSet(viewsets.ModelViewSet):
 
         donation.status = new_status
         donation.save()
+
+        # Auto-generate notification (deduped by event_key)
+        from notifications.services import create_notification
+        create_notification(
+            user=donation.donor,
+            notif_type='status',
+            message=f"Donation #{donation.id} status changed to {new_status}",
+            event_key=f"donation_{donation.id}_{new_status}",
+        )
+
         return Response(DonationSerializer(donation).data)
 
     @action(detail=True, methods=['get'])
