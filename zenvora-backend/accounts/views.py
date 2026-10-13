@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 
@@ -53,3 +53,61 @@ class LoginView(APIView):
             {'token': token.key, 'user': UserSerializer(user).data},
             status=status.HTTP_200_OK,
         )
+
+
+class BudgetView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        u = request.user
+        remaining = (u.weekly_budget or 0) - u.actual_spend
+        return Response({
+            'weekly_budget': u.weekly_budget,
+            'planned_spend': u.planned_spend,
+            'actual_spend': u.actual_spend,
+            'remaining': round(remaining, 2),
+            'over_budget': remaining < 0,
+        })
+
+    def put(self, request):
+        u = request.user
+        budget = request.data.get('weekly_budget')
+        if budget is not None:
+            try:
+                u.weekly_budget = float(budget)
+                u.save()
+            except ValueError:
+                return Response(
+                    {'error': 'Invalid input',
+                     'detail': 'weekly_budget must be a number'},
+                    status=400,
+                )
+        return self.get(request)
+
+
+class BudgetSpendView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        amount = request.data.get('amount')
+        spend_type = request.data.get('type', 'actual')
+
+        try:
+            amount = float(amount)
+        except (TypeError, ValueError):
+            return Response(
+                {'error': 'Invalid input', 'detail': 'amount must be a number'},
+                status=400,
+            )
+
+        u = request.user
+        if spend_type == 'planned':
+            u.planned_spend = (u.planned_spend or 0) + amount
+        else:
+            u.actual_spend = (u.actual_spend or 0) + amount
+        u.save()
+
+        return Response({
+            'planned_spend': u.planned_spend,
+            'actual_spend': u.actual_spend,
+        })

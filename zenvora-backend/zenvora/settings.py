@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'anymail',
 
     # ZENVORA apps
     'accounts',
@@ -47,7 +48,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',      # ← ADDED
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -138,3 +139,22 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
 }
+
+
+# ============ EMAIL — Resend ============
+EMAIL_BACKEND = os.getenv(
+    'EMAIL_BACKEND',
+    'anymail.backends.resend.EmailBackend'
+)
+ANYMAIL = {
+    'RESEND_API_KEY': os.getenv('RESEND_API_KEY', ''),
+}
+DEFAULT_FROM_EMAIL = os.getenv(
+    'DEFAULT_FROM_EMAIL',
+    'ZENVORA <onboarding@resend.dev>'
+)
+
+
+# ============ LOGIN REDIRECT ============
+LOGIN_REDIRECT_URL = '/api/'
+LOGOUT_REDIRECT_URL = '/api-auth/login/'

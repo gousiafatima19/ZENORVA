@@ -9,6 +9,12 @@ class Donation(models.Model):
         ('delivered', 'Delivered'),
     ]
 
+    ACCEPT_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+    ]
+
     donor = models.ForeignKey('accounts.User', on_delete=models.CASCADE,
                               related_name='donations')
     shelter = models.ForeignKey('shelters.Shelter', on_delete=models.SET_NULL,
@@ -25,6 +31,11 @@ class Donation(models.Model):
 
     collection_deadline = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
+
+    # NEW: shelter accept/decline
+    shelter_response = models.CharField(max_length=20, choices=ACCEPT_CHOICES, default='pending')
+    shelter_response_note = models.TextField(blank=True)
+    shelter_responded_at = models.DateTimeField(null=True, blank=True)
 
     is_flagged = models.BooleanField(default=False)
     flag_reason = models.TextField(blank=True)

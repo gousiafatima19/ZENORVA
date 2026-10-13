@@ -1,3 +1,4 @@
 from django.db import models
 
-# Create your models here.
+# Assistant app has no database models.
+# Logic lives in nlp.py, llm.py, services.py.
