@@ -10,7 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-LLM_MODEL = 'llama-3.1-8b-instant'
+LLM_MODEL = 'openai/gpt-oss-120b'
 LLM_TIMEOUT = 10  # seconds
 
 
