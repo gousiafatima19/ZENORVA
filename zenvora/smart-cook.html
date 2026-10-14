@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Cook Mode · ZENVORA</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+</head>
+<body>
+
+<div class="app" id="appShell">
+  <!-- SIDEBAR (Smart Cook active) -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <div class="sidebar-brand">
+      <img src="assets/images/favicon.svg" alt="" />
+      <span class="brand-text">ZENVORA</span>
+    </div>
+    <nav>
+      <p class="nav-section-label">Main</p>
+      <ul class="nav-list">
+        <li><a class="nav-item" href="dashboard.html"><span class="nav-icon"><i data-lucide="layout-dashboard"></i></span><span class="nav-label">Dashboard</span></a></li>
+        <li><a class="nav-item" href="pantry.html"><span class="nav-icon"><i data-lucide="package-open"></i></span><span class="nav-label">Smart Pantry</span></a></li>
+        <li><a class="nav-item" href="scanner.html"><span class="nav-icon"><i data-lucide="scan-line"></i></span><span class="nav-label">Food Scanner</span></a></li>
+        <li><a class="nav-item" href="recipes.html"><span class="nav-icon"><i data-lucide="chef-hat"></i></span><span class="nav-label">Recipes</span></a></li>
+        <li><a class="nav-item" href="dietary-profile.html"><span class="nav-icon"><i data-lucide="leaf"></i></span><span class="nav-label">Dietary Profile</span></a></li>
+      </ul>
+      <p class="nav-section-label">Discover</p>
+      <ul class="nav-list">
+        <li><a class="nav-item" href="shops.html"><span class="nav-icon"><i data-lucide="store"></i></span><span class="nav-label">Shop &amp; Offers</span></a></li>
+        <li><a class="nav-item" href="food-map.html"><span class="nav-icon"><i data-lucide="map-pinned"></i></span><span class="nav-label">Food Map</span></a></li>
+        <li><a class="nav-item" href="shelter-connect.html"><span class="nav-icon"><i data-lucide="hand-heart"></i></span><span class="nav-label">ShelterConnect</span></a></li>
+        <li><a class="nav-item" href="donations.html"><span class="nav-icon"><i data-lucide="gift"></i></span><span class="nav-label">Donations</span></a></li>
+      </ul>
+      <p class="nav-section-label">Tools</p>
+      <ul class="nav-list">
+        <li><a class="nav-item active" href="smart-cook.html"><span class="nav-icon"><i data-lucide="flame"></i></span><span class="nav-label">Smart Cook Mode</span></a></li>
+        <li><a class="nav-item" href="assistant.html"><span class="nav-icon"><i data-lucide="bot"></i></span><span class="nav-label">Ask ZENVORA</span></a></li>
+        <li><a class="nav-item" href="notifications.html"><span class="nav-icon"><i data-lucide="bell"></i></span><span class="nav-label">Notifications</span></a></li>
+        <li><a class="nav-item" href="impact.html"><span class="nav-icon"><i data-lucide="bar-chart-3"></i></span><span class="nav-label">Impact Dashboard</span></a></li>
+      </ul>
+      <p class="nav-section-label">Account</p>
+      <ul class="nav-list">
+        <li><a class="nav-item" href="settings.html"><span class="nav-icon"><i data-lucide="settings"></i></span><span class="nav-label">Settings</span></a></li>
+        <li><a class="nav-item" href="profile.html"><span class="nav-icon"><i data-lucide="user"></i></span><span class="nav-label">Profile</span></a></li>
+        <li><a class="nav-item" href="#" id="logoutLink"><span class="nav-icon"><i data-lucide="log-out"></i></span><span class="nav-label">Logout</span></a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="sidebar-collapse-btn" id="sidebarCollapse" aria-label="Collapse sidebar">
+        <i data-lucide="chevrons-left"></i><span class="nav-label">Collapse</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu"><i data-lucide="menu"></i></button>
+      <h1 class="page-title">Smart Cook Mode</h1>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBell" aria-label="Notifications">
+          <i data-lucide="bell"></i><span class="icon-badge" id="notifBadge" hidden>0</span>
+        </button>
+        <div class="avatar-menu">
+          <button class="avatar-btn" id="avatarBtn" aria-haspopup="true" aria-expanded="false">
+            <span class="avatar" id="avatarInitials">ZK</span>
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <div class="avatar-dropdown" id="avatarDropdown" hidden>
+            <a href="profile.html"><i data-lucide="user"></i> Profile</a>
+            <a href="settings.html"><i data-lucide="settings"></i> Settings</a>
+            <hr />
+            <a href="#" id="logoutLinkTop"><i data-lucide="log-out"></i> Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content content-cook" id="pageContent">
+
+      <div id="connectionBanner" class="alert alert-warn" hidden>
+        <i data-lucide="wifi-off"></i>
+        <div><strong>Recipe service not connected.</strong> Smart Cook Mode is
+          fully functional client-side; recipe data may be demo until the API is live.</div>
+      </div>
+
+      <div id="cookSetup" class="cook-setup">
+        <div class="card">
+          <h2 class="card-title">Choose a recipe</h2>
+          <p class="card-sub">Pick from your saved or suggested recipes.</p>
+          <div id="cookRecipePicker" class="recipe-mini-grid">
+            <p class="empty-state">Loading recipes…</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="cookSession" class="cook-session" hidden>
+
+        <!-- Header -->
+        <header class="cook-header">
+          <div>
+            <p class="cook-kicker">Now cooking</p>
+            <h1 id="cookRecipeTitle">—</h1>
+          </div>
+          <button class="btn btn-outline btn-sm" id="endCookBtn">
+            <i data-lucide="x"></i> Finish cooking
+          </button>
+        </header>
+
+        <!-- Progress -->
+        <div class="cook-progress">
+          <div class="cook-progress-bar"><span id="cookProgressFill"></span></div>
+          <p class="cook-progress-label">Step <span id="cookStepNow">1</span> of <span id="cookStepTotal">1</span></p>
+        </div>
+
+        <!-- Main panel -->
+        <div class="cook-grid">
+
+          <section class="cook-main">
+            <h2 class="cook-step-heading">Step <span id="cookStepNum">1</span></h2>
+            <p class="cook-step-text" id="cookStepText">—</p>
+
+            <div class="cook-controls">
+              <button class="btn btn-outline" id="cookPrevBtn"><i data-lucide="arrow-left"></i> Previous</button>
+              <button class="btn btn-outline" id="cookRepeatBtn"><i data-lucide="volume-2"></i> Repeat instructions</button>
+              <button class="btn btn-outline" id="cookSkipBtn">Next step <i data-lucide="arrow-right"></i></button>
+            </div>
+
+            <div class="cook-voice">
+              <button class="btn btn-ghost" id="cookVoiceToggle">
+                <i data-lucide="mic"></i> <span id="cookVoiceLabel">Voice commands: Off</span>
+              </button>
+              <p class="hint" id="cookVoiceHint">Uses your browser's speech recognition where supported.</p>
+            </div>
+          </section>
+
+          <aside class="cook-side">
+
+            <div class="timer-card">
+              <p class="timer-label">Step timer</p>
+              <div class="timer-display" id="cookTimerDisplay">00:00</div>
+              <div class="timer-controls">
+                <button class="btn btn-primary btn-lg" id="cookReadyBtn">
+                  <i data-lucide="play"></i> I'm Ready
+                </button>
+                <button class="btn btn-outline" id="cookPauseBtn" disabled>
+                  <i data-lucide="pause"></i> Pause
+                </button>
+                <button class="btn btn-ghost" id="cookResetTimerBtn">
+                  <i data-lucide="rotate-ccw"></i> Reset
+                </button>
+              </div>
+              <p class="hint" id="cookTimerHint">Tap "I'm Ready" to start the step timer.</p>
+            </div>
+
+            <div class="reminder-card">
+              <p class="timer-label">Check-in reminder</p>
+              <div class="reminder-display">
+                Next in <strong id="cookReminderNext">—</strong>
+              </div>
+              <div class="reminder-interval">
+                <label>Every</label>
+                <select id="cookReminderInterval">
+                  <option value="5">5 min</option>
+                  <option value="7" selected>7 min</option>
+                  <option value="10">10 min</option>
+                </select>
+              </div>
+              <p class="hint">Reminders are separate from the step timer. The step
+                timer keeps running regardless of the reminder interval.</p>
+            </div>
+
+            <div class="card">
+              <h3 class="card-title">Mark step complete</h3>
+              <button class="btn btn-gold btn-block" id="cookCompleteStepBtn">
+                <i data-lucide="check"></i> Mark this step done
+              </button>
+              <button class="btn btn-ghost btn-block" id="cookFinishBtn">
+                <i data-lucide="flag"></i> Finish cooking
+              </button>
+            </div>
+
+          </aside>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/smart-cook.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) lucide.createIcons();
+    ZENVORA.auth.requireAuth();
+    ZENVORA.layout.init();
+    ZENVORA.smartCook.init();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Discover recipes on ZENVORA — smart food intelligence & waste reduction." />
+  <title>Recipes · ZENVORA</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+</head>
+<body>
+
+<div class="app" id="appShell">
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <div class="sidebar-brand">
+      <img src="assets/images/favicon.svg" alt="" />
+      <span class="brand-text">ZENVORA</span>
+    </div>
+
+    <nav>
+      <p class="nav-section-label">Main</p>
+      <ul class="nav-list">
+        <li><a class="nav-item" href="dashboard.html">
+          <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span>
+          <span class="nav-label">Dashboard</span></a></li>
+        <li><a class="nav-item" href="pantry.html">
+          <span class="nav-icon"><i data-lucide="package-open"></i></span>
+          <span class="nav-label">Smart Pantry</span></a></li>
+        <li><a class="nav-item" href="scanner.html">
+          <span class="nav-icon"><i data-lucide="scan-line"></i></span>
+          <span class="nav-label">Food Scanner</span></a></li>
+        <li><a class="nav-item active" href="recipes.html">
+          <span class="nav-icon"><i data-lucide="chef-hat"></i></span>
+          <span class="nav-label">Recipes</span></a></li>
+        <li><a class="nav-item" href="dietary-profile.html">
+          <span class="nav-icon"><i data-lucide="leaf"></i></span>
+          <span class="nav-label">Dietary Profile</span></a></li>
+      </ul>
+
+      <p class="nav-section-label">Discover</p>
+      <ul class="nav-list">
+        <li><a class="nav-item" href="shops.html">
+          <span class="nav-icon"><i data-lucide="store"></i></span>
+          <span class="nav-label">Shop &amp; Offers</span></a></li>
+        <li><a class="nav-item" href="food-map.html">
+          <span class="nav-icon"><i data-lucide="map-pinned"></i></span>
+          <span class="nav-label">Food Map</span></a></li>
+        <li><a class="nav-item" href="shelter-connect.html">
+          <span class="nav-icon"><i data-lucide="hand-heart"></i></span>
+          <span class="nav-label">ShelterConnect</span></a></li>
+        <li><a class="nav-item" href="donations.html">
+          <span class="nav-icon"><i data-lucide="gift"></i></span>
+          <span class="nav-label">Donations</span></a></li>
+      </ul>
+
+      <p class="nav-section-label">Tools</p>
+      <ul class="nav-list">
+        <li><a class="nav-item" href="smart-cook.html">
+          <span class="nav-icon"><i data-lucide="flame"></i></span>
+          <span class="nav-label">Smart Cook Mode</span></a></li>
+        <li><a class="nav-item" href="assistant.html">
+          <span class="nav-icon"><i data-lucide="bot"></i></span>
+          <span class="nav-label">Ask ZENVORA</span></a></li>
+        <li><a class="nav-item" href="notifications.html">
+          <span class="nav-icon"><i data-lucide="bell"></i></span>
+          <span class="nav-label">Notifications</span>
+          <span class="nav-badge" id="sidebarNotifBadge" hidden>0</span></a></li>
+        <li><a class="nav-item" href="impact.html">
+          <span class="nav-icon"><i data-lucide="bar-chart-3"></i></span>
+          <span class="nav-label">Impact Dashboard</span></a></li>
+      </ul>
+
+      <p class="nav-section-label">Account</p>
+      <ul class="nav-list">
+        <li><a class="nav-item" href="settings.html">
+          <span class="nav-icon"><i data-lucide="settings"></i></span>
+          <span class="nav-label">Settings</span></a></li>
+        <li><a class="nav-item" href="profile.html">
+          <span class="nav-icon"><i data-lucide="user"></i></span>
+          <span class="nav-label">Profile</span></a></li>
+        <li><a class="nav-item" href="#" id="logoutLink">
+          <span class="nav-icon"><i data-lucide="log-out"></i></span>
+          <span class="nav-label">Logout</span></a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-collapse-btn" id="sidebarCollapse" aria-label="Collapse sidebar">
+        <i data-lucide="chevrons-left"></i>
+        <span class="nav-label">Collapse</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN ==================== -->
+  <div class="main">
+
+    <header class="topbar">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+        <i data-lucide="menu"></i>
+      </button>
+
+      <h1 class="page-title">Recipes</h1>
+
+      <div class="topbar-search">
+        <span class="search-icon"><i data-lucide="search"></i></span>
+        <input type="search" id="recipeSearch" placeholder="Search recipes…" aria-label="Search recipes" />
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" id="notifBell" aria-label="Notifications">
+          <i data-lucide="bell"></i>
+          <span class="icon-badge" id="notifBadge" hidden>0</span>
+        </button>
+
+        <div class="avatar-menu">
+          <button class="avatar-btn" id="avatarBtn" aria-haspopup="true" aria-expanded="false">
+            <span class="avatar" id="avatarInitials">ZK</span>
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <div class="avatar-dropdown" id="avatarDropdown" hidden>
+            <a href="profile.html"><i data-lucide="user"></i> Profile</a>
+            <a href="settings.html"><i data-lucide="settings"></i> Settings</a>
+            <hr />
+            <a href="#" id="logoutLinkTop"><i data-lucide="log-out"></i> Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content" id="pageContent">
+
+      <div id="connectionBanner" class="alert alert-warn" hidden>
+        <i data-lucide="wifi-off"></i>
+        <div>
+          <strong>Recipe service not connected.</strong>
+          Showing demo recipes where indicated. Configure the API in
+          <code>assets/js/config.js</code>.
+        </div>
+      </div>
+
+      <section class="page-actions">
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label for="recipeDiet" class="sr-only">Diet</label>
+            <select id="recipeDiet">
+              <option value="">All diets</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="vegan">Vegan</option>
+              <option value="gluten-free">Gluten-free</option>
+            </select>
+
+            <label for="recipeTime" class="sr-only">Time</label>
+            <select id="recipeTime">
+              <option value="">Any time</option>
+              <option value="15">Under 15 min</option>
+              <option value="30">Under 30 min</option>
+              <option value="60">Under 60 min</option>
+            </select>
+
+            <label for="recipeDifficulty" class="sr-only">Difficulty</label>
+            <select id="recipeDifficulty">
+              <option value="">Any difficulty</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+
+            <label for="recipeCost" class="sr-only">Cost</label>
+            <select id="recipeCost">
+              <option value="">Any cost</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+
+            <label class="checkbox-row">
+              <input type="checkbox" id="recipePantryOnly" />
+              Only from my pantry
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="recipe-grid" id="recipeGrid">
+        <p class="empty-state">
+          <i data-lucide="loader-2" class="spin"></i> Loading recipes…
+        </p>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/layout.js"></script>
+<script src="assets/js/recipes.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) lucide.createIcons();
+    ZENVORA.auth.requireAuth();
+    ZENVORA.layout.init();
+    ZENVORA.recipes.initListPage();
+  });
+</script>
+</body>
+</html>
