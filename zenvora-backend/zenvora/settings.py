@@ -105,7 +105,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
+# ============ CSRF — disabled for API (we use Token auth) ============
+CSRF_TRUSTED_ORIGINS = [
+    'https://zenorva.onrender.com',
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+]
 # ============ i18n ============
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Kolkata'
