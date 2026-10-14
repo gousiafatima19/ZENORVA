@@ -10,8 +10,17 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-LLM_MODEL = 'openai/gpt-oss-120b'
-LLM_TIMEOUT = 10  # seconds
+# --- Config -----------------------------------------------------------------
+# NOTE: This must be a valid Groq model ID. See https://console.groq.com/docs/models
+# Verified working models (as of writing):
+#   - llama-3.1-70b-versatile
+#   - llama-3.3-70b-versatile
+#   - llama-3.1-8b-instant
+LLM_MODEL = os.getenv('LLM_MODEL', 'llama-3.1-70b-versatile')
+
+LLM_TIMEOUT = float(os.getenv('LLM_TIMEOUT', '10'))   # seconds
+LLM_MAX_TOKENS = int(os.getenv('LLM_MAX_TOKENS', '200'))
+LLM_TEMPERATURE = float(os.getenv('LLM_TEMPERATURE', '0.3'))
 
 
 SYSTEM_PROMPT = """You are Ask ZENVORA, the assistant for a food rescue app.
@@ -26,11 +35,8 @@ Rules:
 """
 
 
-def ask_llm(question, db_context):
-    """
-    Call Groq LLM with question + context.
-    Returns answer string, or None if LLM is unavailable.
-    """
+def _client():
+    """Build a Groq client, or return None if unavailable."""
     api_key = os.getenv('GROQ_API_KEY', '').strip()
     if not api_key:
         logger.info('GROQ_API_KEY not set — using NLP fallback')
@@ -43,7 +49,37 @@ def ask_llm(question, db_context):
         return None
 
     try:
-        client = Groq(api_key=api_key, timeout=LLM_TIMEOUT)
+        # `timeout` is supported in groq>=0.9. Older SDKs use `timeout` too,
+        # but if you hit a TypeError, upgrade: pip install -U groq
+        return Groq(api_key=api_key, timeout=LLM_TIMEOUT)
+    except Exception as e:
+        logger.warning(f'Failed to initialise Groq client: {e}')
+        return None
+
+
+def ask_llm(question, db_context):
+    """
+    Call Groq LLM with question + context.
+
+    Returns:
+        str  — the model's answer
+        None — if the LLM is unavailable (caller should use NLP fallback)
+    """
+    if not question or not str(question).strip():
+        logger.info('Empty question — skipping LLM call')
+        return None
+
+    client = _client()
+    if client is None:
+        return None
+
+    # Keep context bounded so we don't blow past token limits.
+    context_str = str(db_context) if db_context is not None else '{}'
+    if len(context_str) > 6000:
+        context_str = context_str[:6000] + '…[truncated]'
+        logger.info('DB context truncated to 6000 chars for LLM call')
+
+    try:
         response = client.chat.completions.create(
             model=LLM_MODEL,
             messages=[
@@ -52,16 +88,28 @@ def ask_llm(question, db_context):
                     'role': 'user',
                     'content': (
                         f"Question: {question}\n\n"
-                        f"Context (JSON):\n{db_context}"
+                        f"Context (JSON):\n{context_str}"
                     ),
                 },
             ],
-            temperature=0.3,
-            max_tokens=200,
+            temperature=LLM_TEMPERATURE,
+            max_tokens=LLM_MAX_TOKENS,
         )
-        answer = response.choices[0].message.content.strip()
-        return answer or None
+
+        # Defensive extraction — Groq responses are usually well-formed,
+        # but we don't want a malformed one to crash the caller.
+        if not response or not getattr(response, 'choices', None):
+            logger.warning('LLM returned no choices — falling back to NLP')
+            return None
+
+        answer = (response.choices[0].message.content or '').strip()
+        if not answer:
+            logger.info('LLM returned empty answer — falling back to NLP')
+            return None
+
+        return answer
+
     except Exception as e:
-        # This catches rate limits, token exhaustion, timeouts, network errors
+        # Catches rate limits, token exhaustion, timeouts, network errors, etc.
         logger.warning(f'LLM call failed, falling back to NLP: {e}')
         return None
