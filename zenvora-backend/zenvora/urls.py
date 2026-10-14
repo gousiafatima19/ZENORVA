@@ -21,6 +21,10 @@ urlpatterns = [
     path('api/assistant/', include('assistant.urls')),
 
     # --- Serve Person 1's assets/ folder ---
+    # Kept the original block exactly as it was. In production on Render with
+    # DEBUG=False, Django's static serve view is a no-op. WhiteNoise middleware
+    # (see settings.py) will serve /assets/* automatically because STATIC_URL
+    # is set to '/assets/'. This URL pattern still works locally when DEBUG=True.
     re_path(r'^assets/(?P<path>.*)$', serve, {
         'document_root': str(settings.FRONTEND_DIR / 'assets')
     }),
