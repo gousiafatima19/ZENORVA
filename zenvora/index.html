@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ZENVORA — AI-Powered Food Intelligence & Waste Reduction. Every Ingredient Counts. Every Meal Matters." />
+  <title>ZENVORA — Every Ingredient Counts. Every Meal Matters.</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+</head>
+<body class="landing-body">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="index.html" class="brand" aria-label="ZENVORA home">
+        <img src="assets/images/logo.svg" alt="ZENVORA" class="brand-logo" />
+      </a>
+
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#impact">Impact</a>
+        <a href="#about">About</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="login.html" class="btn btn-ghost">Sign In</a>
+        <a href="register.html" class="btn btn-primary">Get Started</a>
+      </div>
+
+      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Open menu" aria-expanded="false">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+
+    <!-- Mobile drawer -->
+    <div class="mobile-drawer" id="mobileDrawer" hidden>
+      <nav aria-label="Mobile navigation">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#impact">Impact</a>
+        <a href="#about">About</a>
+        <hr />
+        <a href="login.html">Sign In</a>
+        <a href="register.html" class="btn btn-primary btn-block">Get Started</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ==================== HERO ==================== -->
+  <section class="hero">
+    <div class="container hero-grid">
+
+      <div class="hero-copy">
+        <span class="eyebrow">
+          <i data-lucide="leaf"></i>
+          Supporting UN SDG 2 · Zero Hunger
+        </span>
+
+        <h1 class="hero-title">
+          Every Ingredient Counts.<br />
+          <span class="accent">Every Meal Matters.</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          <strong>ZENVORA</strong> is AI-powered food intelligence that helps you
+          track your pantry, cook smarter with what you already have, find
+          affordable local offers, and donate surplus food to registered shelters.
+        </p>
+
+        <p class="hero-tagline">Smart Food. Brighter Futures.</p>
+
+        <div class="hero-actions">
+          <a href="register.html" class="btn btn-primary btn-lg">
+            <i data-lucide="sparkles"></i> Get Started
+          </a>
+          <a href="#features" class="btn btn-outline btn-lg">
+            Explore Features
+          </a>
+          <a href="login.html" class="btn btn-ghost">Sign In</a>
+        </div>
+
+        <ul class="hero-points">
+          <li><i data-lucide="check-circle-2"></i> Reduce household food waste</li>
+          <li><i data-lucide="check-circle-2"></i> Cook from what you own</li>
+          <li><i data-lucide="check-circle-2"></i> Donate surplus safely</li>
+        </ul>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-girls">
+          <img src="assets/images/girl-hijab-placeholder.svg"
+               alt="Student wearing a forest-green hijab and mustard-yellow outfit working on ZENVORA"
+               class="girl girl-1" />
+          <img src="assets/images/girl-no-hijab-placeholder.svg"
+               alt="Student with dark hair and a mustard-yellow kurta working on ZENVORA"
+               class="girl girl-2" />
+        </div>
+        <img src="assets/images/phone-mockup.svg"
+             alt="Smartphone showing the ZENVORA dashboard interface"
+             class="hero-phone" />
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== SDG / MISSION STRIP ==================== -->
+  <section class="mission-strip">
+    <div class="container mission-grid">
+      <div class="mission-item">
+        <i data-lucide="globe-2"></i>
+        <div>
+          <h3>Zero Hunger</h3>
+          <p>Aligned with UN Sustainable Development Goal 2.</p>
+        </div>
+      </div>
+      <div class="mission-item">
+        <i data-lucide="trash-2"></i>
+        <div>
+          <h3>Food Waste Reduction</h3>
+          <p>One-third of all food produced is wasted. We help change that.</p>
+        </div>
+      </div>
+      <div class="mission-item">
+        <i data-lucide="hand-heart"></i>
+        <div>
+          <h3>Community Donations</h3>
+          <p>Connect surplus food with verified local shelters.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FEATURES ==================== -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow"><i data-lucide="sparkles"></i> Platform Features</span>
+        <h2>Everything you need to waste less and cook better</h2>
+        <p class="section-sub">
+          A complete suite of tools — from pantry tracking and smart recipes
+          to an interactive food map and one-tap shelter donations.
+        </p>
+      </div>
+
+      <div class="feature-grid">
+
+        <article class="feature-card">
+          <div class="feature-icon"><i data-lucide="package-open"></i></div>
+          <h3>Smart Pantry</h3>
+          <p>Track every ingredient with quantity, expiry dates, categories
+             and low-stock alerts.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon"><i data-lucide="scan-line"></i></div>
+          <h3>Food Scanner</h3>
+          <p>Scan product labels to extract ingredients, nutrition and
+             allergen information instantly.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon"><i data-lucide="chef-hat"></i></div>
+          <h3>AI Recipe Intelligence</h3>
+          <p>Personalized recipes that prioritize what you already own and
+             what expires soonest.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon"><i data-lucide="flame"></i></div>
+          <h3>Smart Cook Mode</h3>
+          <p>Hands-free, voice-guided cooking with step timers and
+             check-in reminders.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon"><i data-lucide="map-pinned"></i></div>
+          <h3>Interactive Food Map</h3>
+          <p>Find nearby shops, offers, shelters and donation pickup
+             points on a live map.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon"><i data-lucide="hand-heart"></i></div>
+          <h3>ShelterConnect</h3>
+          <p>Match surplus food with registered shelters and track the
+             donation from reserve to delivery.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon"><i data-lucide="bot"></i></div>
+          <h3>Ask ZENVORA</h3>
+          <p>A voice and text assistant that answers questions about your
+             pantry, recipes and donations.</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon"><i data-lucide="bar-chart-3"></i></div>
+          <h3>Impact Dashboard</h3>
+          <p>See your real contribution — meals saved, food donated,
+             and grocery savings over time.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== HOW IT WORKS ==================== -->
+  <section class="section section-alt" id="how-it-works">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow"><i data-lucide="route"></i> How It Works</span>
+        <h2>From pantry to plate to purpose</h2>
+        <p class="section-sub">
+          Four simple steps that turn everyday cooking into measurable
+          community impact.
+        </p>
+      </div>
+
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <h3>Add your food</h3>
+          <p>Type items manually or scan product labels to build your
+             digital pantry.</p>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <h3>Get smart recipes</h3>
+          <p>ZENVORA suggests meals that use what you own and prioritize
+             items expiring soonest.</p>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <h3>Cook with confidence</h3>
+          <p>Smart Cook Mode guides you step-by-step with voice prompts
+             and timers.</p>
+        </li>
+        <li class="step">
+          <span class="step-num">4</span>
+          <h3>Donate the surplus</h3>
+          <p>List unneeded food and connect directly with registered
+             local shelters.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ==================== IMPACT ==================== -->
+  <section class="section" id="impact">
+    <div class="container impact-grid">
+      <div class="impact-copy">
+        <span class="eyebrow"><i data-lucide="bar-chart-3"></i> Our Mission</span>
+        <h2>Small habits. Real, measurable impact.</h2>
+        <p>
+          Every ingredient you save and every meal you donate adds up.
+          ZENVORA tracks your real contribution — no inflated numbers,
+          no fake statistics.
+        </p>
+        <a href="register.html" class="btn btn-primary">Start Tracking Your Impact</a>
+      </div>
+
+      <div class="impact-stats">
+        <div class="impact-stat">
+          <i data-lucide="utensils"></i>
+          <strong>1/3</strong>
+          <span>of all food produced globally is wasted</span>
+        </div>
+        <div class="impact-stat">
+          <i data-lucide="users"></i>
+          <strong>828M</strong>
+          <span>people face hunger worldwide (UN, 2024)</span>
+        </div>
+        <div class="impact-stat">
+          <i data-lucide="wallet"></i>
+          <strong>₹ &nbsp;Saved</strong>
+          <span>tracked personally by each ZENVORA user</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== ABOUT ==================== -->
+  <section class="section section-alt" id="about">
+    <div class="container about-inner">
+      <h2>About ZENVORA</h2>
+      <p>
+        ZENVORA is a student technology project built to support
+        <strong>UN Sustainable Development Goal 2: Zero Hunger</strong>.
+        It combines AI, community data, and everyday kitchen habits
+        to reduce household food waste and connect surplus food with
+        people who need it most.
+      </p>
+      <p>
+        Every figure shown in the app comes from verified backend data
+        or is clearly labelled as demo content. We never fabricate
+        shelter records, live prices, or donation outcomes.
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================== CTA ==================== -->
+  <section class="cta-band">
+    <div class="container cta-inner">
+      <h2>Ready to make every meal matter?</h2>
+      <p>Join ZENVORA and start turning your kitchen into a force for good.</p>
+      <div class="cta-actions">
+        <a href="register.html" class="btn btn-gold btn-lg">Create Free Account</a>
+        <a href="login.html" class="btn btn-outline btn-lg">Sign In</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="assets/images/logo.svg" alt="ZENVORA" />
+        <p>Smart Food. Brighter Futures.</p>
+        <p class="footer-small">
+          AI-Powered Food Intelligence &amp; Waste Reduction
+        </p>
+      </div>
+
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="#impact">Impact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Account</h4>
+        <ul>
+          <li><a href="login.html">Sign In</a></li>
+          <li><a href="register.html">Register</a></li>
+          <li><a href="settings.html">Settings</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Mission</h4>
+        <ul>
+          <li><a href="#about">About ZENVORA</a></li>
+          <li><a href="https://sdgs.un.org/goals/goal2" target="_blank" rel="noopener">UN SDG 2</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <p>© <span id="year"></span> ZENVORA · Student Technology Project · Supporting UN SDG 2: Zero Hunger</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    // Init Lucide icons
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) lucide.createIcons();
+
+      // Mobile nav toggle
+      const toggle = document.getElementById('mobileNavToggle');
+      const drawer = document.getElementById('mobileDrawer');
+      toggle?.addEventListener('click', () => {
+        const open = !drawer.hidden;
+        drawer.hidden = open;
+        toggle.setAttribute('aria-expanded', String(!open));
+        if (window.lucide) lucide.createIcons();
+      });
+
+      // Smooth scroll close drawer on link click
+      drawer?.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => { drawer.hidden = true; });
+      });
+    });
+  </script>
+</body>
+</html>

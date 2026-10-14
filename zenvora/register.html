@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account · ZENVORA</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+</head>
+<body class="auth-body">
+
+  <div class="auth-shell">
+
+    <aside class="auth-visual" aria-hidden="true">
+      <a href="index.html" class="auth-visual-brand">
+        <img src="assets/images/logo.svg" alt="ZENVORA" />
+      </a>
+
+      <div class="auth-visual-copy">
+        <h1>Join ZENVORA</h1>
+        <p>Smart Food. Brighter Futures.</p>
+        <ul class="auth-visual-points">
+          <li><i data-lucide="check-circle-2"></i> Free student project</li>
+          <li><i data-lucide="check-circle-2"></i> Supports UN SDG 2</li>
+          <li><i data-lucide="check-circle-2"></i> Your data, your control</li>
+        </ul>
+      </div>
+
+      <div class="auth-visual-girls">
+        <img src="assets/images/girl-hijab-placeholder.svg" alt="" />
+        <img src="assets/images/girl-no-hijab-placeholder.svg" alt="" />
+      </div>
+    </aside>
+
+    <main class="auth-form-panel">
+      <div class="auth-form-wrap">
+
+        <a href="index.html" class="auth-back">
+          <i data-lucide="arrow-left"></i> Back to home
+        </a>
+
+        <h2 class="auth-title">Create your account</h2>
+        <p class="auth-subtitle">It takes less than a minute.</p>
+
+        <div id="authAlert" class="alert" hidden role="alert"></div>
+
+        <form id="registerForm" novalidate>
+
+          <div class="field" id="field-name">
+            <label for="name">Full name</label>
+            <input type="text" id="name" name="name" autocomplete="name"
+                   required placeholder="e.g. Ayesha Khan" />
+            <p class="error-msg" data-error="name"></p>
+          </div>
+
+          <div class="field" id="field-email">
+            <label for="email">Email address</label>
+            <input type="email" id="email" name="email" autocomplete="email"
+                   required placeholder="you@example.com" />
+            <p class="error-msg" data-error="email"></p>
+          </div>
+
+          <div class="field" id="field-password">
+            <label for="password">Password</label>
+            <div class="input-group">
+              <input type="password" id="password" name="password"
+                     autocomplete="new-password" required
+                     placeholder="At least 8 characters" minlength="8" />
+              <button type="button" class="toggle-vis" id="togglePassword"
+                      aria-label="Show password">Show</button>
+            </div>
+            <p class="hint">Use at least 8 characters with a mix of letters and numbers.</p>
+            <p class="error-msg" data-error="password"></p>
+          </div>
+
+          <div class="field" id="field-confirm">
+            <label for="confirm">Confirm password</label>
+            <input type="password" id="confirm" name="confirm"
+                   autocomplete="new-password" required
+                   placeholder="Re-enter your password" />
+            <p class="error-msg" data-error="confirm"></p>
+          </div>
+
+          <label class="checkbox-row" id="field-terms">
+            <input type="checkbox" id="terms" name="terms" required />
+            <span>I agree to the ZENVORA terms and understand this is a student project.</span>
+          </label>
+          <p class="error-msg" data-error="terms"></p>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="registerBtn">
+            <span class="btn-label">Create Account</span>
+            <span class="btn-spinner" hidden>
+              <i data-lucide="loader-2" class="spin"></i>
+            </span>
+          </button>
+        </form>
+
+        <p class="auth-switch">
+          Already have an account? <a href="login.html">Sign in</a>
+        </p>
+
+        <p class="auth-note">
+          <i data-lucide="shield-check"></i>
+          We never store your password in the browser. Authentication is handled
+          securely by the Django backend.
+        </p>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) lucide.createIcons();
+      ZENVORA.auth.initRegisterPage();
+    });
+  </script>
+</body>
+</html>
