@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 480" role="img" aria-label="Illustration of a student with dark hair wearing a mustard-yellow kurta">
+  <defs>
+    <linearGradient id="kurtaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#D4AF57"/>
+      <stop offset="100%" stop-color="#B8953F"/>
+    </linearGradient>
+    <linearGradient id="hairGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3A2418"/>
+      <stop offset="100%" stop-color="#1F120A"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="150" cy="440" rx="120" ry="20" fill="#DCE8DC" opacity="0.7"/>
+  <path d="M75 470 Q 70 300 100 240 Q 120 200 150 195 Q 180 200 200 240 Q 230 300 225 470 Z" fill="url(#kurtaGrad)"/>
+  <path d="M140 200 L 150 240 L 160 200" stroke="#B8953F" stroke-width="3" fill="none"/>
+  <path d="M100 250 Q 70 300 65 400 Q 60 460 80 470 L 105 470 Q 95 400 110 310 Z" fill="#B8953F"/>
+  <path d="M200 250 Q 230 300 235 400 Q 240 460 220 470 L 195 470 Q 205 400 190 310 Z" fill="#B8953F"/>
+  <rect x="138" y="185" width="24" height="30" rx="8" fill="#E8B98E"/>
+  <path d="M150 68 Q 88 70 80 150 Q 78 210 92 250 L 108 250 Q 96 200 100 150 Q 106 90 150 84 Q 194 90 200 150 Q 204 200 192 250 L 208 250 Q 222 210 220 150 Q 212 70 150 68 Z" fill="url(#hairGrad)"/>
+  <ellipse cx="150" cy="150" rx="52" ry="62" fill="#EFC49B"/>
+  <path d="M98 130 Q 110 90 150 84 Q 190 90 202 130 Q 190 108 150 106 Q 110 108 98 130 Z" fill="url(#hairGrad)"/>
+  <ellipse cx="130" cy="150" rx="6" ry="7" fill="#252A27"/>
+  <ellipse cx="170" cy="150" rx="6" ry="7" fill="#252A27"/>
+  <circle cx="132" cy="147" r="2" fill="#FFFFFF"/>
+  <circle cx="172" cy="147" r="2" fill="#FFFFFF"/>
+  <path d="M118 134 Q 130 130 142 134" stroke="#3A2A1E" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M158 134 Q 170 130 182 134" stroke="#3A2A1E" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M136 178 Q 150 190 164 178" stroke="#8B3A2F" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="118" cy="170" rx="10" ry="5" fill="#E59B8A" opacity="0.5"/>
+  <ellipse cx="182" cy="170" rx="10" ry="5" fill="#E59B8A" opacity="0.5"/>
+  <circle cx="100" cy="160" r="4" fill="#D4AF57"/>
+  <circle cx="200" cy="160" r="4" fill="#D4AF57"/>
+</svg>
