@@ -6,7 +6,7 @@
 (function () {
   var Z = window.ZENVORA = window.ZENVORA || {};
   var config = Z.config || {
-    API_BASE: "https://zenorva.onrender.com",
+    API_BASE: "",
     TOKEN_KEY: "zenvora_token",
     USER_KEY: "zenvora_user"
   };
