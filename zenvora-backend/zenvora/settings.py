@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-FRONTEND_DIR = BASE_DIR / 'Zenvora-Frontend'
+FRONTEND_DIR = BASE_DIR.parent / 'zenvora'
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
@@ -63,7 +63,7 @@ ROOT_URLCONF = 'zenvora.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [str(FRONTEND_DIR)],  # ← ADD
+        'DIRS': [str(FRONTEND_DIR)],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
