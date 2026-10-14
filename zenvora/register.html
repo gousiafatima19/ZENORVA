@@ -1,428 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register · Account creation</title>
-    <!-- Simple clean styles for readability -->
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-        }
-        body {
-            background: #f4f7fc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 16px;
-        }
-        .card {
-            background: #ffffff;
-            border-radius: 24px;
-            box-shadow: 0 12px 30px rgba(0, 20, 30, 0.1);
-            padding: 32px 28px;
-            width: 100%;
-            max-width: 440px;
-            transition: 0.2s;
-        }
-        h1 {
-            font-size: 2rem;
-            font-weight: 600;
-            margin: 0 0 8px 0;
-            color: #0b2b3b;
-            letter-spacing: -0.02em;
-        }
-        .subhead {
-            color: #4b6b7c;
-            margin-bottom: 28px;
-            font-size: 1rem;
-            border-left: 4px solid #2f9e8f;
-            padding-left: 14px;
-        }
-        .form-group {
-            margin-bottom: 18px;
-        }
-        label {
-            display: block;
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: #1e4a5f;
-            margin-bottom: 6px;
-        }
-        .input-wrapper {
-            display: flex;
-            align-items: center;
-            background: #f0f4f9;
-            border-radius: 14px;
-            border: 1.5px solid #d9e2ec;
-            transition: 0.2s;
-            padding: 0 6px 0 0;
-        }
-        .input-wrapper:focus-within {
-            border-color: #2f9e8f;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(47, 158, 143, 0.12);
-        }
-        .input-wrapper input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 14px 16px;
-            font-size: 1rem;
-            outline: none;
-            border-radius: 14px;
-            color: #0b2b3b;
-        }
-        .input-wrapper input::placeholder {
-            color: #9bb1c0;
-            font-weight: 400;
-        }
-        .show-btn {
-            background: transparent;
-            border: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #2f9e8f;
-            padding: 8px 14px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: 0.2s;
-            letter-spacing: 0.01em;
-            white-space: nowrap;
-            background: #e3f2f0;
-        }
-        .show-btn:hover {
-            background: #c8e6e2;
-            color: #186b60;
-        }
-        .show-btn:active {
-            transform: scale(0.96);
-        }
-        .btn-register {
-            width: 100%;
-            background: #0b2b3b;
-            color: white;
-            border: none;
-            border-radius: 40px;
-            padding: 16px 20px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 16px;
-            transition: 0.2s;
-            box-shadow: 0 8px 18px rgba(11, 43, 59, 0.25);
-            letter-spacing: 0.01em;
-        }
-        .btn-register:hover {
-            background: #1c4b60;
-            box-shadow: 0 12px 24px rgba(11, 43, 59, 0.35);
-        }
-        .btn-register:active {
-            transform: scale(0.98);
-            box-shadow: 0 4px 10px rgba(11, 43, 59, 0.3);
-        }
-        .message-area {
-            margin-top: 22px;
-            padding: 12px 16px;
-            border-radius: 14px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: 0.2s;
-            background: #f0f4f9;
-            color: #0b2b3b;
-            text-align: center;
-            min-height: 52px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-left: 5px solid #b0c8d4;
-        }
-        .message-area.success {
-            background: #e0f2e9;
-            border-left-color: #1f8b6b;
-            color: #0b4b3a;
-        }
-        .message-area.error {
-            background: #ffe9e9;
-            border-left-color: #c73b3b;
-            color: #8f1f1f;
-        }
-        .message-area.info {
-            background: #e3f2f0;
-            border-left-color: #2f9e8f;
-            color: #186b60;
-        }
-        .accounts-summary {
-            margin-top: 26px;
-            border-top: 1px dashed #cbdae5;
-            padding-top: 18px;
-            font-size: 0.9rem;
-            color: #2e5c6e;
-        }
-        .accounts-summary strong {
-            color: #0b2b3b;
-            font-weight: 700;
-        }
-        .account-badge {
-            display: inline-block;
-            background: #e8f0f7;
-            padding: 5px 12px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            margin: 6px 6px 0 0;
-            font-weight: 500;
-            color: #1e4a5f;
-            border: 1px solid #bdd3e0;
-        }
-        .hint {
-            font-size: 0.8rem;
-            color: #6c8b9c;
-            margin-top: 6px;
-            margin-left: 4px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account · ZENVORA</title>
+  <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 </head>
-<body>
-    <div class="card">
-        <h1>Create account</h1>
-        <div class="subhead">Join us — it’s quick and secure.</div>
+<body class="auth-body">
 
-        <!-- Registration form -->
+  <div class="auth-shell">
+
+    <aside class="auth-visual" aria-hidden="true">
+      <a href="index.html" class="auth-visual-brand">
+        <img src="/assets/images/logo.png" alt="ZENVORA" />
+      </a>
+
+      <div class="auth-visual-copy">
+        <h1>Join ZENVORA</h1>
+        <p>Smart Food. Brighter Futures.</p>
+        <ul class="auth-visual-points">
+          <li><i data-lucide="check-circle-2"></i> Free student project</li>
+          <li><i data-lucide="check-circle-2"></i> Supports UN SDG 2</li>
+          <li><i data-lucide="check-circle-2"></i> Your data, your control</li>
+        </ul>
+      </div>
+
+      <div class="auth-visual-girls">
+        <img src="/assets/images/girl-hijab-placeholder.png" alt="" />
+        <img src="/assets/images/girl-no-hijab-placeholder.png" alt="" />
+      </div>
+    </aside>
+
+    <main class="auth-form-panel">
+      <div class="auth-form-wrap">
+
+        <a href="index.html" class="auth-back">
+          <i data-lucide="arrow-left"></i> Back to home
+        </a>
+
+        <h2 class="auth-title">Create your account</h2>
+        <p class="auth-subtitle">It takes less than a minute.</p>
+
+        <div id="authAlert" class="alert" hidden role="alert"></div>
+
         <form id="registerForm" novalidate>
-            <div class="form-group">
-                <label for="fullname">Full name</label>
-                <div class="input-wrapper">
-                    <input type="text" id="fullname" name="fullname" placeholder="John Carter" autocomplete="name">
-                </div>
-            </div>
 
-            <div class="form-group">
-                <label for="email">Email address</label>
-                <div class="input-wrapper">
-                    <input type="email" id="email" name="email" placeholder="john@example.com" autocomplete="email">
-                </div>
-            </div>
+          <div class="field" id="field-name">
+            <label for="name">Full name</label>
+            <input type="text" id="name" name="name" autocomplete="name"
+                   required placeholder="e.g. Ayesha Khan" />
+            <p class="error-msg" data-error="name"></p>
+          </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <div class="input-wrapper">
-                    <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="new-password">
-                    <!-- Show / hide button works -->
-                    <button type="button" class="show-btn" id="togglePasswordBtn" aria-label="Show password">Show</button>
-                </div>
-                <div class="hint">At least 6 characters</div>
-            </div>
+          <div class="field" id="field-email">
+            <label for="email">Email address</label>
+            <input type="email" id="email" name="email" autocomplete="email"
+                   required placeholder="you@example.com" />
+            <p class="error-msg" data-error="email"></p>
+          </div>
 
-            <button type="submit" class="btn-register" id="registerBtn">Create account</button>
+          <div class="field" id="field-password">
+            <label for="password">Password</label>
+            <div class="input-group">
+              <input type="password" id="password" name="password"
+                     autocomplete="new-password" required
+                     placeholder="At least 8 characters" minlength="8" />
+              <button type="button" class="toggle-vis" id="togglePassword"
+                      aria-label="Show password">Show</button>
+            </div>
+            <p class="hint">Use at least 8 characters with a mix of letters and numbers.</p>
+            <p class="error-msg" data-error="password"></p>
+          </div>
+
+          <div class="field" id="field-confirm">
+            <label for="confirm">Confirm password</label>
+            <input type="password" id="confirm" name="confirm"
+                   autocomplete="new-password" required
+                   placeholder="Re-enter your password" />
+            <p class="error-msg" data-error="confirm"></p>
+          </div>
+
+          <label class="checkbox-row" id="field-terms">
+            <input type="checkbox" id="terms" name="terms" required />
+            <span>I agree to the ZENVORA terms and understand this is a student project.</span>
+          </label>
+          <p class="error-msg" data-error="terms"></p>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="registerBtn">
+            <span class="btn-label">Create Account</span>
+            <span class="btn-spinner" hidden>
+              <i data-lucide="loader-2" class="spin"></i>
+            </span>
+          </button>
         </form>
 
-        <!-- Feedback message area -->
-        <div id="messageBox" class="message-area info">Fill the form and click "Create account".</div>
+        <p class="auth-switch">
+          Already have an account? <a href="login.html">Sign in</a>
+        </p>
 
-        <!-- List of created accounts (demo) -->
-        <div class="accounts-summary" id="accountsList">
-            <strong>📋 Registered accounts (0):</strong>
-            <div id="accountsContainer" style="margin-top: 8px; display: flex; flex-wrap: wrap;"></div>
-        </div>
-    </div>
+        <p class="auth-note">
+          <i data-lucide="shield-check"></i>
+          We never store your password in the browser. Authentication is handled
+          securely by the Django backend.
+        </p>
+      </div>
+    </main>
 
-    <script>
-        (function() {
-            // ---------- DOM elements ----------
-            const form = document.getElementById('registerForm');
-            const fullnameInput = document.getElementById('fullname');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const toggleBtn = document.getElementById('togglePasswordBtn');
-            const messageBox = document.getElementById('messageBox');
-            const accountsContainer = document.getElementById('accountsContainer');
-            const accountsListDiv = document.getElementById('accountsList');
+  </div>
 
-            // ---------- Store registered accounts (in-memory) ----------
-            let accounts = [];   // each account: { fullname, email, password? (we won't display pw) }
-
-            // ---------- Helper: update accounts UI ----------
-            function renderAccounts() {
-                // Clear container
-                accountsContainer.innerHTML = '';
-                const count = accounts.length;
-                
-                // Update heading text with count
-                accountsListDiv.querySelector('strong').textContent = `📋 Registered accounts (${count}):`;
-
-                if (count === 0) {
-                    const emptyMsg = document.createElement('span');
-                    emptyMsg.style.color = '#8faec2';
-                    emptyMsg.style.fontStyle = 'italic';
-                    emptyMsg.textContent = 'No accounts yet.';
-                    accountsContainer.appendChild(emptyMsg);
-                    return;
-                }
-
-                // Add a badge for each account (show name and email, but not password)
-                accounts.forEach((acc, index) => {
-                    const badge = document.createElement('span');
-                    badge.className = 'account-badge';
-                    // Show fullname (or email if fullname missing) — friendly
-                    const displayName = acc.fullname.trim() || 'Unnamed';
-                    badge.textContent = `${displayName} · ${acc.email}`;
-                    accountsContainer.appendChild(badge);
-                });
-            }
-
-            // ---------- Show / Hide password (the "Show" button) ----------
-            toggleBtn.addEventListener('click', function() {
-                // Toggle password visibility
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
-                    toggleBtn.textContent = 'Hide';
-                    toggleBtn.setAttribute('aria-label', 'Hide password');
-                } else {
-                    passwordInput.type = 'password';
-                    toggleBtn.textContent = 'Show';
-                    toggleBtn.setAttribute('aria-label', 'Show password');
-                }
-            });
-
-            // ---------- Reset show button state if password field changes (optional) ----------
-            // (keep the button text consistent when user clears field — not critical but neat)
-            passwordInput.addEventListener('input', function() {
-                // If password field becomes empty, we might keep the current show/hide state
-                // No action needed, but we keep the button as is.
-            });
-
-            // ---------- Message helper ----------
-            function setMessage(text, type = 'info') {
-                messageBox.textContent = text;
-                messageBox.className = 'message-area ' + type;
-            }
-
-            // ---------- Form submit: create account ----------
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();   // prevent page reload
-
-                // Get trimmed values
-                const fullname = fullnameInput.value.trim();
-                const email = emailInput.value.trim();
-                const password = passwordInput.value;  // don't trim password (spaces allowed, but we'll check length)
-
-                // --- Validation ---
-                if (!fullname) {
-                    setMessage('❌ Please enter your full name.', 'error');
-                    fullnameInput.focus();
-                    return;
-                }
-
-                if (!email) {
-                    setMessage('❌ Please enter your email address.', 'error');
-                    emailInput.focus();
-                    return;
-                }
-
-                // Simple email regex (basic validation)
-                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailPattern.test(email)) {
-                    setMessage('❌ Please enter a valid email address (e.g., name@domain.com).', 'error');
-                    emailInput.focus();
-                    return;
-                }
-
-                if (!password) {
-                    setMessage('❌ Please choose a password.', 'error');
-                    passwordInput.focus();
-                    return;
-                }
-
-                if (password.length < 6) {
-                    setMessage('❌ Password must be at least 6 characters long.', 'error');
-                    passwordInput.focus();
-                    return;
-                }
-
-                // --- Check for duplicate email (case-insensitive) ---
-                const emailExists = accounts.some(acc => acc.email.toLowerCase() === email.toLowerCase());
-                if (emailExists) {
-                    setMessage('⚠️ An account with this email already exists.', 'error');
-                    emailInput.focus();
-                    return;
-                }
-
-                // --- Create new account object ---
-                const newAccount = {
-                    fullname: fullname,
-                    email: email,
-                    // For security, we normally wouldn't store plain password. 
-                    // Here we store it only to demonstrate (but we never display it).
-                    // In real app: hash + salt. We just keep it for simulation.
-                    password: password,   // <-- demonstration only (not shown in UI)
-                    createdAt: new Date().toISOString()
-                };
-
-                // Add to accounts array
-                accounts.push(newAccount);
-
-                // --- Render updated list ---
-                renderAccounts();
-
-                // --- Show success message ---
-                setMessage(`✅ Account created for ${fullname} (${email})`, 'success');
-
-                // --- Reset form (optional, but good UX) ---
-                // We'll keep fields empty after successful registration
-                form.reset();
-
-                // Because reset() clears the password field, also reset the show/hide button
-                // to "Show" and password type to 'password'
-                passwordInput.type = 'password';
-                toggleBtn.textContent = 'Show';
-                toggleBtn.setAttribute('aria-label', 'Show password');
-
-                // Focus on first field for next entry (optional)
-                fullnameInput.focus();
-
-                // Note: we don't store password anywhere else; accounts array has it but we never show it.
-                // Just to be safe, you might want to avoid keeping passwords in plain memory in production.
-            });
-
-            // ---------- Initial render ----------
-            renderAccounts();
-            // Set initial message (already in HTML, but just in case)
-            setMessage('Fill the form and click "Create account".', 'info');
-
-            // Additional: If user clicks on the show button while password field is empty, it still works.
-            // Also, if password was hidden and then we reset, we already handle it.
-
-            // Edge case: After form reset, password field becomes empty, button text set to Show.
-            // Also, if the user manually changes password type? No.
-
-            // Ensure that if the user toggles and then submits, the password type doesn't matter.
-
-            // Also, for better UX, keep the show button text synced if the password field is cleared by user.
-            // Not required, but we can add a small listener that if password length is 0, we set type=password and button text to 'Show'.
-            // This avoids the button saying "Hide" while the field is empty and type=text.
-            passwordInput.addEventListener('input', function() {
-                if (passwordInput.value.length === 0 && passwordInput.type === 'text') {
-                    // If the field is empty and currently visible, we keep it visible? 
-                    // Actually user might want to see empty field; but it's more consistent to keep 'Show' text if it's empty?
-                    // I'll keep the logic simple: only update if you want. But it's okay.
-                    // I'll leave as is — user can still toggle.
-                }
-                // However, if the field is empty and type is text, the button says "Hide". That's fine.
-            });
-
-            // Also if user toggles to text, then clears field — still visible (text). That's okay.
-            // We won't force reset.
-
-            // Final: if the form is reset programmatically (e.g., after successful registration), we reset the type and button.
-            // Already done in submit handler after form.reset().
-
-            // Also ensure that the show button is not inside a label that could cause issues — it's inside .input-wrapper, but not inside label. Good.
-
-            // No other issues.
-        })();
-    </script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) lucide.createIcons();
+      ZENVORA.auth.initRegisterPage();
+    });
+  </script>
 </body>
 </html>
