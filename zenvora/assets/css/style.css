@@ -2035,30 +2035,82 @@ input[type="checkbox"], input[type="radio"] {
 }
 .hero-points svg { width: 18px; height: 18px; color: var(--zv-success); flex-shrink: 0; }
 
+/* ============================================================
+   HERO VISUAL — layout for real PNG illustrations
+   ============================================================ */
 .hero-visual {
   position: relative;
-  display: flex; align-items: flex-end; justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 24px;
   min-height: 560px;
+  padding: 20px;
 }
+
 .hero-girls {
-  position: absolute;
-  inset: 0;
-  display: flex; align-items: flex-end; justify-content: center;
-  gap: 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  max-height: 100%;
 }
+
 .hero-girls .girl {
-  height: 420px;
+  height: 480px;
   width: auto;
-  filter: drop-shadow(0 16px 30px rgba(18, 60, 47, 0.18));
+  max-width: 100%;
+  border-radius: var(--zv-radius);
+  background: transparent;
+  filter: drop-shadow(0 16px 30px rgba(18, 60, 47, 0.15));
+  transition: transform 260ms ease;
+  object-fit: contain;
 }
-.hero-girls .girl-1 { transform: translateY(10px); }
-.hero-girls .girl-2 { transform: translateY(20px); }
+.hero-girls .girl-1 { transform: translateY(0); }
+.hero-girls .girl-2 { transform: translateY(8px); }
+
 .hero-phone {
-  position: relative;
-  z-index: 2;
-  max-height: 520px;
+  height: 520px;
   width: auto;
-  filter: drop-shadow(0 24px 40px rgba(18, 60, 47, 0.3));
+  max-width: 100%;
+  filter: drop-shadow(0 24px 40px rgba(18, 60, 47, 0.28));
+  align-self: flex-end;
+  object-fit: contain;
+}
+
+/* Responsive stacking for smaller screens */
+@media (max-width: 1024px) {
+  .hero-visual {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    gap: 20px;
+    padding: 10px;
+  }
+  .hero-girls {
+    justify-content: center;
+    gap: 16px;
+  }
+  .hero-girls .girl { height: 360px; }
+  .hero-phone {
+    height: 420px;
+    justify-self: center;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero-girls .girl { height: 280px; }
+  .hero-phone { height: 340px; }
+}
+
+@media (max-width: 480px) {
+  .hero-girls {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .hero-girls .girl { height: 240px; }
+  .hero-phone { height: 300px; }
 }
 
 .mission-strip {
@@ -2467,23 +2519,20 @@ input[type="checkbox"], input[type="radio"] {
   }
 }
 
-
-/* =========================================================
-   Ask ZENVORA — Chat styles
-   ========================================================= */
-
+/* ============================================================
+   Ask ZENVORA — Chat styles (extra)
+   ============================================================ */
 .chat-wrap {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  background: var(--white, #fff);
+  background: var(--zv-white);
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 4px 18px rgba(37, 75, 59, 0.08);
   max-width: 760px;
   margin: 0 auto;
 }
-
 .chat-log {
   min-height: 340px;
   max-height: 55vh;
@@ -2493,14 +2542,12 @@ input[type="checkbox"], input[type="radio"] {
   gap: 12px;
   padding: 8px;
 }
-
 .chat-msg {
   display: flex;
   width: 100%;
 }
 .chat-msg.user { justify-content: flex-end; }
 .chat-msg.bot  { justify-content: flex-start; }
-
 .bubble {
   max-width: 78%;
   padding: 12px 16px;
@@ -2519,7 +2566,6 @@ input[type="checkbox"], input[type="radio"] {
   color: #ffffff;
   border-top-right-radius: 4px;
 }
-
 .chat-form {
   display: flex;
   gap: 8px;
@@ -2537,13 +2583,10 @@ input[type="checkbox"], input[type="radio"] {
 }
 .chat-form input[type="text"]:focus {
   outline: none;
-  border-color: #D4AF57;
+  border-color: var(--zv-gold);
   box-shadow: 0 0 0 3px rgba(212, 175, 87, 0.2);
 }
-.chat-form .btn {
-  flex-shrink: 0;
-}
-
+.chat-form .btn { flex-shrink: 0; }
 .chat-suggest {
   display: flex;
   flex-wrap: wrap;
@@ -2560,17 +2603,13 @@ input[type="checkbox"], input[type="radio"] {
   cursor: pointer;
   font-family: inherit;
 }
-.chip-btn:hover {
-  background: #B8C99A;
-}
-
+.chip-btn:hover { background: #B8C99A; }
 .mic-status {
   font-size: 12px;
   color: #889;
   margin: 0;
   font-style: italic;
 }
-
 .sample-note {
   font-size: 12px;
   color: #889;
@@ -2578,11 +2617,9 @@ input[type="checkbox"], input[type="radio"] {
   margin: 8px 0 0;
   font-style: italic;
 }
-
-/* Sidebar notif badge */
 .nav-badge {
   margin-left: auto;
-  background: #D4AF57;
+  background: var(--zv-gold);
   color: #254B3B;
   font-size: 11px;
   font-weight: 800;
