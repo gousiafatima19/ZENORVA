@@ -62,7 +62,7 @@ ROOT_URLCONF = 'zenvora.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'static_frontend')],   # ← ADD
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -158,3 +158,11 @@ DEFAULT_FROM_EMAIL = os.getenv(
 # ============ LOGIN REDIRECT ============
 LOGIN_REDIRECT_URL = '/api/'
 LOGOUT_REDIRECT_URL = '/api-auth/login/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static_frontend'),
+]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
