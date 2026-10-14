@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard · ZENVORA</title>
-  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <title>Dashboard Â· ZENVORA</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
@@ -17,7 +17,7 @@
   <!-- ==================== SIDEBAR ==================== -->
   <aside class="sidebar" id="sidebar" aria-label="Primary">
     <div class="sidebar-brand">
-      <img src="assets/images/favicon.svg" alt="" />
+      <img src="/assets/images/favicon.svg" alt="" />
       <span class="brand-text">ZENVORA</span>
     </div>
 
@@ -109,7 +109,7 @@
 
       <div class="topbar-search">
         <span class="search-icon"><i data-lucide="search"></i></span>
-        <input type="search" id="globalSearch" placeholder="Search pantry, recipes, shops…"
+        <input type="search" id="globalSearch" placeholder="Search pantry, recipes, shopsâ€¦"
                aria-label="Search" />
       </div>
 
@@ -150,7 +150,7 @@
       <!-- Welcome -->
       <section class="welcome-row">
         <div>
-          <h2 class="welcome-title" id="welcomeTitle">Welcome back 👋</h2>
+          <h2 class="welcome-title" id="welcomeTitle">Welcome back ðŸ‘‹</h2>
           <p class="welcome-sub" id="welcomeSub">Here's what's happening in your kitchen today.</p>
         </div>
         <div class="welcome-actions">
@@ -168,29 +168,29 @@
         <article class="stat-card">
           <div class="stat-icon stat-icon-green"><i data-lucide="package-open"></i></div>
           <p class="stat-label">Pantry items</p>
-          <p class="stat-value" id="statPantry">—</p>
-          <p class="stat-meta" id="statPantryMeta">Loading…</p>
+          <p class="stat-value" id="statPantry">â€”</p>
+          <p class="stat-meta" id="statPantryMeta">Loadingâ€¦</p>
         </article>
 
         <article class="stat-card">
           <div class="stat-icon stat-icon-warn"><i data-lucide="alarm-clock"></i></div>
           <p class="stat-label">Expiring soon</p>
-          <p class="stat-value" id="statExpiring">—</p>
-          <p class="stat-meta" id="statExpiringMeta">Loading…</p>
+          <p class="stat-value" id="statExpiring">â€”</p>
+          <p class="stat-meta" id="statExpiringMeta">Loadingâ€¦</p>
         </article>
 
         <article class="stat-card">
           <div class="stat-icon stat-icon-gold"><i data-lucide="chef-hat"></i></div>
           <p class="stat-label">Recipes ready</p>
-          <p class="stat-value" id="statRecipes">—</p>
-          <p class="stat-meta" id="statRecipesMeta">Loading…</p>
+          <p class="stat-value" id="statRecipes">â€”</p>
+          <p class="stat-meta" id="statRecipesMeta">Loadingâ€¦</p>
         </article>
 
         <article class="stat-card">
           <div class="stat-icon stat-icon-info"><i data-lucide="hand-heart"></i></div>
           <p class="stat-label">Food donated</p>
-          <p class="stat-value" id="statDonated">—</p>
-          <p class="stat-meta" id="statDonatedMeta">Loading…</p>
+          <p class="stat-value" id="statDonated">â€”</p>
+          <p class="stat-meta" id="statDonatedMeta">Loadingâ€¦</p>
         </article>
       </section>
 
@@ -210,7 +210,7 @@
             </div>
             <ul class="mini-list" id="expiringList">
               <li class="empty-state">
-                <i data-lucide="loader-2" class="spin"></i> Loading…
+                <i data-lucide="loader-2" class="spin"></i> Loadingâ€¦
               </li>
             </ul>
           </div>
@@ -224,7 +224,7 @@
               <a href="recipes.html" class="btn btn-ghost btn-sm">All recipes</a>
             </div>
             <div class="recipe-mini-grid" id="suggestedRecipes">
-              <p class="empty-state">Loading…</p>
+              <p class="empty-state">Loadingâ€¦</p>
             </div>
           </div>
 
@@ -236,7 +236,7 @@
               </div>
             </div>
             <ul class="mini-list" id="recentList">
-              <li class="empty-state">Loading…</li>
+              <li class="empty-state">Loadingâ€¦</li>
             </ul>
           </div>
 
@@ -254,11 +254,11 @@
             <div class="card-head">
               <div>
                 <h3 class="card-title">Shopping list</h3>
-                <p class="card-sub" id="shoppingSummary">—</p>
+                <p class="card-sub" id="shoppingSummary">â€”</p>
               </div>
             </div>
             <ul class="mini-list" id="shoppingListPreview">
-              <li class="empty-state">Loading…</li>
+              <li class="empty-state">Loadingâ€¦</li>
             </ul>
           </div>
 
@@ -271,7 +271,7 @@
               <a href="food-map.html" class="btn btn-ghost btn-sm">Open map</a>
             </div>
             <ul class="mini-list" id="nearbyList">
-              <li class="empty-state">Loading…</li>
+              <li class="empty-state">Loadingâ€¦</li>
             </ul>
           </div>
 
@@ -284,7 +284,7 @@
               <a href="donations.html" class="btn btn-ghost btn-sm">View all</a>
             </div>
             <ul class="mini-list" id="donationsPreview">
-              <li class="empty-state">Loading…</li>
+              <li class="empty-state">Loadingâ€¦</li>
             </ul>
           </div>
 
@@ -317,11 +317,11 @@
 <!-- Mobile overlay when sidebar is open -->
 <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-<script src="assets/js/config.js"></script>
-<script src="assets/js/api.js"></script>
-<script src="assets/js/auth.js"></script>
-<script src="assets/js/layout.js"></script>
-<script src="assets/js/dashboard.js"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/layout.js"></script>
+<script src="/assets/js/dashboard.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) lucide.createIcons();

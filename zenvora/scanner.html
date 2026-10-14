@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Food Scanner · ZENVORA</title>
-  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <title>Food Scanner Â· ZENVORA</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 </head>
 <body>
@@ -15,7 +15,7 @@
   <!-- SIDEBAR (same structure; Scanner active) -->
   <aside class="sidebar" id="sidebar" aria-label="Primary">
     <div class="sidebar-brand">
-      <img src="assets/images/favicon.svg" alt="" />
+      <img src="/assets/images/favicon.svg" alt="" />
       <span class="brand-text">ZENVORA</span>
     </div>
     <nav>
@@ -83,7 +83,7 @@
       <div id="connectionBanner" class="alert alert-warn" hidden>
         <i data-lucide="wifi-off"></i>
         <div><strong>Scanner service not connected.</strong>
-          Upload and camera capture are ready — image recognition requires the
+          Upload and camera capture are ready â€” image recognition requires the
           backend endpoint. Configure it in <code>assets/js/config.js</code>.</div>
       </div>
 
@@ -92,7 +92,7 @@
         <div>
           <strong>Allergen safety notice.</strong>
           Scanned data may be incomplete. Always verify ingredient labels
-          yourself before consuming food — especially if you have allergies.
+          yourself before consuming food â€” especially if you have allergies.
         </div>
       </div>
 
@@ -107,7 +107,7 @@
                role="button" aria-label="Upload or capture product image">
             <i data-lucide="camera"></i>
             <p><strong>Drop an image</strong> or click to upload</p>
-            <p class="hint">JPG, PNG · up to 8 MB</p>
+            <p class="hint">JPG, PNG Â· up to 8 MB</p>
             <input type="file" id="scannerFile" accept="image/*" capture="environment" hidden />
           </div>
 
@@ -139,7 +139,7 @@
 
           <div id="scanLoadingState" class="empty-state-block" hidden>
             <i data-lucide="loader-2" class="spin"></i>
-            <p>Analyzing image…</p>
+            <p>Analyzing imageâ€¦</p>
           </div>
 
           <div id="scanErrorState" class="empty-state-block" hidden>
@@ -186,11 +186,11 @@
 
 <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-<script src="assets/js/config.js"></script>
-<script src="assets/js/api.js"></script>
-<script src="assets/js/auth.js"></script>
-<script src="assets/js/layout.js"></script>
-<script src="assets/js/scanner.js"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/layout.js"></script>
+<script src="/assets/js/scanner.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) lucide.createIcons();

@@ -1,21 +1,21 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Pantry · ZENVORA</title>
-  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <title>Smart Pantry Â· ZENVORA</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 </head>
 <body>
 
 <div class="app" id="appShell">
-  <!-- SIDEBAR — identical structure to dashboard.html, with .active on Smart Pantry -->
+  <!-- SIDEBAR â€” identical structure to dashboard.html, with .active on Smart Pantry -->
   <aside class="sidebar" id="sidebar" aria-label="Primary">
     <div class="sidebar-brand">
-      <img src="assets/images/favicon.svg" alt="" />
+      <img src="/assets/images/favicon.svg" alt="" />
       <span class="brand-text">ZENVORA</span>
     </div>
     <nav>
@@ -61,7 +61,7 @@
       <h1 class="page-title">Smart Pantry</h1>
       <div class="topbar-search">
         <span class="search-icon"><i data-lucide="search"></i></span>
-        <input type="search" id="pantrySearch" placeholder="Search pantry items…" aria-label="Search pantry" />
+        <input type="search" id="pantrySearch" placeholder="Search pantry itemsâ€¦" aria-label="Search pantry" />
       </div>
       <div class="topbar-actions">
         <button class="icon-btn" id="notifBell" aria-label="Notifications">
@@ -111,8 +111,8 @@
             <select id="sortBy">
               <option value="expiry-asc">Expiry: soonest first</option>
               <option value="expiry-desc">Expiry: latest first</option>
-              <option value="name-asc">Name: A → Z</option>
-              <option value="name-desc">Name: Z → A</option>
+              <option value="name-asc">Name: A â†’ Z</option>
+              <option value="name-desc">Name: Z â†’ A</option>
               <option value="added-desc">Recently added</option>
             </select>
 
@@ -149,7 +149,7 @@
           </thead>
           <tbody id="pantryTableBody">
             <tr><td colspan="7" class="empty-state">
-              <i data-lucide="loader-2" class="spin"></i> Loading pantry…
+              <i data-lucide="loader-2" class="spin"></i> Loading pantryâ€¦
             </td></tr>
           </tbody>
         </table>
@@ -180,7 +180,7 @@
         <div class="field" id="field-itemCategory">
           <label for="itemCategory">Category</label>
           <select id="itemCategory" required>
-            <option value="">Select…</option>
+            <option value="">Selectâ€¦</option>
             <option value="vegetables">Vegetables</option>
             <option value="fruits">Fruits</option>
             <option value="grains">Grains &amp; Cereals</option>
@@ -264,11 +264,11 @@
 
 <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-<script src="assets/js/config.js"></script>
-<script src="assets/js/api.js"></script>
-<script src="assets/js/auth.js"></script>
-<script src="assets/js/layout.js"></script>
-<script src="assets/js/pantry.js"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/layout.js"></script>
+<script src="/assets/js/pantry.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) lucide.createIcons();

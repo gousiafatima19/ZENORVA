@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Food Map · ZENVORA</title>
-  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
+  <title>Food Map Â· ZENVORA</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 </head>
 <body>
@@ -17,7 +17,7 @@
   <!-- SIDEBAR (Food Map active) -->
   <aside class="sidebar" id="sidebar" aria-label="Primary">
     <div class="sidebar-brand">
-      <img src="assets/images/favicon.svg" alt="" />
+      <img src="/assets/images/favicon.svg" alt="" />
       <span class="brand-text">ZENVORA</span>
     </div>
     <nav>
@@ -63,7 +63,7 @@
       <h1 class="page-title">Food Map</h1>
       <div class="topbar-search">
         <span class="search-icon"><i data-lucide="search"></i></span>
-        <input type="search" id="mapSearch" placeholder="Search area or address…" aria-label="Search map" />
+        <input type="search" id="mapSearch" placeholder="Search area or addressâ€¦" aria-label="Search map" />
       </div>
       <div class="topbar-actions">
         <button class="icon-btn" id="notifBell" aria-label="Notifications">
@@ -130,7 +130,7 @@
           <div id="foodMap" class="map-canvas" role="region" aria-label="Interactive map of shops, shelters and donation points"></div>
 
           <div class="map-status" id="mapStatus" hidden>
-            <i data-lucide="loader-2" class="spin"></i> <span id="mapStatusText">Loading map…</span>
+            <i data-lucide="loader-2" class="spin"></i> <span id="mapStatusText">Loading mapâ€¦</span>
           </div>
         </div>
 
@@ -144,16 +144,16 @@
 
           <div class="map-side-detail" id="mapSideDetail" hidden>
             <div class="map-side-head">
-              <span class="badge badge-info" id="detailType">—</span>
+              <span class="badge badge-info" id="detailType">â€”</span>
               <button class="icon-btn" id="closeDetailPanel" aria-label="Close details"><i data-lucide="x"></i></button>
             </div>
-            <h3 id="detailName">—</h3>
-            <p class="detail-address" id="detailAddress">—</p>
+            <h3 id="detailName">â€”</h3>
+            <p class="detail-address" id="detailAddress">â€”</p>
 
             <ul class="detail-list">
-              <li id="detailDistanceRow" hidden><i data-lucide="navigation"></i> <span id="detailDistance">—</span></li>
-              <li id="detailHoursRow" hidden><i data-lucide="clock"></i> <span id="detailHours">—</span></li>
-              <li id="detailContactRow" hidden><i data-lucide="phone"></i> <span id="detailContact">—</span></li>
+              <li id="detailDistanceRow" hidden><i data-lucide="navigation"></i> <span id="detailDistance">â€”</span></li>
+              <li id="detailHoursRow" hidden><i data-lucide="clock"></i> <span id="detailHours">â€”</span></li>
+              <li id="detailContactRow" hidden><i data-lucide="phone"></i> <span id="detailContact">â€”</span></li>
             </ul>
 
             <div id="detailRequirementsWrap" hidden>
@@ -186,11 +186,11 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="assets/js/config.js"></script>
-<script src="assets/js/api.js"></script>
-<script src="assets/js/auth.js"></script>
-<script src="assets/js/layout.js"></script>
-<script src="assets/js/food-map.js"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/layout.js"></script>
+<script src="/assets/js/food-map.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) lucide.createIcons();

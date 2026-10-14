@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Impact Dashboard · ZENVORA</title>
-  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <title>Impact Dashboard Â· ZENVORA</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
@@ -16,7 +16,7 @@
   <!-- SIDEBAR (Impact active) -->
   <aside class="sidebar" id="sidebar" aria-label="Primary">
     <div class="sidebar-brand">
-      <img src="assets/images/favicon.svg" alt="" />
+      <img src="/assets/images/favicon.svg" alt="" />
       <span class="brand-text">ZENVORA</span>
     </div>
     <nav>
@@ -97,25 +97,25 @@
         <article class="stat-card">
           <div class="stat-icon stat-icon-green"><i data-lucide="utensils"></i></div>
           <p class="stat-label">Meals saved</p>
-          <p class="stat-value" id="impactMeals">—</p>
+          <p class="stat-value" id="impactMeals">â€”</p>
           <p class="stat-meta">Total meals rescued</p>
         </article>
         <article class="stat-card">
           <div class="stat-icon stat-icon-info"><i data-lucide="truck"></i></div>
           <p class="stat-label">Food delivered</p>
-          <p class="stat-value" id="impactDelivered">—</p>
+          <p class="stat-value" id="impactDelivered">â€”</p>
           <p class="stat-meta">Completed donations</p>
         </article>
         <article class="stat-card">
           <div class="stat-icon stat-icon-warn"><i data-lucide="bookmark"></i></div>
           <p class="stat-label">Available / Reserved</p>
-          <p class="stat-value" id="impactAvailable">—</p>
+          <p class="stat-value" id="impactAvailable">â€”</p>
           <p class="stat-meta">In progress</p>
         </article>
         <article class="stat-card">
           <div class="stat-icon stat-icon-gold"><i data-lucide="wallet"></i></div>
           <p class="stat-label">Estimated savings</p>
-          <p class="stat-value" id="impactSavings">—</p>
+          <p class="stat-value" id="impactSavings">â€”</p>
           <p class="stat-meta">From pantry optimization</p>
         </article>
       </section>
@@ -144,7 +144,7 @@
 
           <div class="card">
             <h3 class="card-title">Why it matters</h3>
-            <p class="card-sub">SDG 2 — Zero Hunger</p>
+            <p class="card-sub">SDG 2 â€” Zero Hunger</p>
             <ul class="mini-list">
               <li>
                 <span class="mini-icon"><i data-lucide="leaf"></i></span>
@@ -173,7 +173,7 @@
       </section>
 
       <p class="sample-note" id="impactDemoNote" hidden>
-        ⚠️ Demo figures — live backend data not yet available.
+        âš ï¸ Demo figures â€” live backend data not yet available.
       </p>
 
     </main>
@@ -182,11 +182,11 @@
 
 <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-<script src="assets/js/config.js"></script>
-<script src="assets/js/api.js"></script>
-<script src="assets/js/auth.js"></script>
-<script src="assets/js/layout.js"></script>
-<script src="assets/js/impact.js"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/layout.js"></script>
+<script src="/assets/js/impact.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) lucide.createIcons();

@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Donations · ZENVORA</title>
-  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <title>Donations Â· ZENVORA</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 </head>
 <body>
@@ -15,7 +15,7 @@
   <!-- SIDEBAR (Donations active) -->
   <aside class="sidebar" id="sidebar" aria-label="Primary">
     <div class="sidebar-brand">
-      <img src="assets/images/favicon.svg" alt="" />
+      <img src="/assets/images/favicon.svg" alt="" />
       <span class="brand-text">ZENVORA</span>
     </div>
     <nav>
@@ -91,22 +91,22 @@
         <article class="stat-card">
           <div class="stat-icon stat-icon-info"><i data-lucide="package"></i></div>
           <p class="stat-label">Available</p>
-          <p class="stat-value" id="donStatAvailable">—</p>
+          <p class="stat-value" id="donStatAvailable">â€”</p>
         </article>
         <article class="stat-card">
           <div class="stat-icon stat-icon-warn"><i data-lucide="bookmark"></i></div>
           <p class="stat-label">Reserved</p>
-          <p class="stat-value" id="donStatReserved">—</p>
+          <p class="stat-value" id="donStatReserved">â€”</p>
         </article>
         <article class="stat-card">
           <div class="stat-icon stat-icon-gold"><i data-lucide="truck"></i></div>
           <p class="stat-label">Collected</p>
-          <p class="stat-value" id="donStatCollected">—</p>
+          <p class="stat-value" id="donStatCollected">â€”</p>
         </article>
         <article class="stat-card">
           <div class="stat-icon stat-icon-green"><i data-lucide="check-circle-2"></i></div>
           <p class="stat-label">Delivered</p>
-          <p class="stat-value" id="donStatDelivered">—</p>
+          <p class="stat-value" id="donStatDelivered">â€”</p>
         </article>
       </section>
 
@@ -119,7 +119,7 @@
         </div>
 
         <ul id="donationsList" class="mini-list">
-          <li class="empty-state">Loading donations…</li>
+          <li class="empty-state">Loading donationsâ€¦</li>
         </ul>
       </section>
 
@@ -129,11 +129,11 @@
 
 <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-<script src="assets/js/config.js"></script>
-<script src="assets/js/api.js"></script>
-<script src="assets/js/auth.js"></script>
-<script src="assets/js/layout.js"></script>
-<script src="assets/js/donations.js"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/layout.js"></script>
+<script src="/assets/js/donations.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) lucide.createIcons();

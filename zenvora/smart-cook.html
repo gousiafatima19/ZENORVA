@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Cook Mode · ZENVORA</title>
-  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <title>Smart Cook Mode Â· ZENVORA</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 </head>
 <body>
@@ -15,7 +15,7 @@
   <!-- SIDEBAR (Smart Cook active) -->
   <aside class="sidebar" id="sidebar" aria-label="Primary">
     <div class="sidebar-brand">
-      <img src="assets/images/favicon.svg" alt="" />
+      <img src="/assets/images/favicon.svg" alt="" />
       <span class="brand-text">ZENVORA</span>
     </div>
     <nav>
@@ -91,7 +91,7 @@
           <h2 class="card-title">Choose a recipe</h2>
           <p class="card-sub">Pick from your saved or suggested recipes.</p>
           <div id="cookRecipePicker" class="recipe-mini-grid">
-            <p class="empty-state">Loading recipes…</p>
+            <p class="empty-state">Loading recipesâ€¦</p>
           </div>
         </div>
       </div>
@@ -102,7 +102,7 @@
         <header class="cook-header">
           <div>
             <p class="cook-kicker">Now cooking</p>
-            <h1 id="cookRecipeTitle">—</h1>
+            <h1 id="cookRecipeTitle">â€”</h1>
           </div>
           <button class="btn btn-outline btn-sm" id="endCookBtn">
             <i data-lucide="x"></i> Finish cooking
@@ -120,7 +120,7 @@
 
           <section class="cook-main">
             <h2 class="cook-step-heading">Step <span id="cookStepNum">1</span></h2>
-            <p class="cook-step-text" id="cookStepText">—</p>
+            <p class="cook-step-text" id="cookStepText">â€”</p>
 
             <div class="cook-controls">
               <button class="btn btn-outline" id="cookPrevBtn"><i data-lucide="arrow-left"></i> Previous</button>
@@ -158,7 +158,7 @@
             <div class="reminder-card">
               <p class="timer-label">Check-in reminder</p>
               <div class="reminder-display">
-                Next in <strong id="cookReminderNext">—</strong>
+                Next in <strong id="cookReminderNext">â€”</strong>
               </div>
               <div class="reminder-interval">
                 <label>Every</label>
@@ -192,11 +192,11 @@
 
 <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
-<script src="assets/js/config.js"></script>
-<script src="assets/js/api.js"></script>
-<script src="assets/js/auth.js"></script>
-<script src="assets/js/layout.js"></script>
-<script src="assets/js/smart-cook.js"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/layout.js"></script>
+<script src="/assets/js/smart-cook.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) lucide.createIcons();

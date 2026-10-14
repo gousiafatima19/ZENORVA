@@ -1,13 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="View a ZENVORA recipe — ingredients, missing items, substitutions, and step-by-step instructions." />
-  <title>Recipe · ZENVORA</title>
-  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/responsive.css" />
+  <meta name="description" content="View a ZENVORA recipe â€” ingredients, missing items, substitutions, and step-by-step instructions." />
+  <title>Recipe Â· ZENVORA</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/responsive.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 </head>
 <body>
@@ -17,7 +17,7 @@
   <!-- ==================== SIDEBAR ==================== -->
   <aside class="sidebar" id="sidebar" aria-label="Primary">
     <div class="sidebar-brand">
-      <img src="assets/images/favicon.svg" alt="" />
+      <img src="/assets/images/favicon.svg" alt="" />
       <span class="brand-text">ZENVORA</span>
     </div>
 
@@ -147,7 +147,7 @@
       <!-- Loading -->
       <div id="recipeDetailLoading" class="empty-state-block">
         <i data-lucide="loader-2" class="spin"></i>
-        <p>Loading recipe…</p>
+        <p>Loading recipeâ€¦</p>
       </div>
 
       <!-- Error -->
@@ -170,28 +170,28 @@
         <!-- Hero -->
         <header class="recipe-hero">
           <img id="recipeHeroImg"
-               src="assets/images/recipe-placeholder.svg"
+               src="/assets/images/recipe-placeholder.svg"
                alt=""
                class="recipe-hero-img" />
 
           <div class="recipe-hero-overlay">
             <div class="recipe-hero-badges">
-              <span class="badge badge-gold" id="recipeDifficulty">—</span>
-              <span class="badge badge-muted" id="recipeDietBadge" hidden>—</span>
+              <span class="badge badge-gold" id="recipeDifficulty">â€”</span>
+              <span class="badge badge-muted" id="recipeDietBadge" hidden>â€”</span>
               <span class="badge badge-success" id="recipePantryBadge" hidden>
                 <i data-lucide="check-circle-2"></i>
                 <span id="recipePantryBadgeText">Ready to cook</span>
               </span>
             </div>
 
-            <h1 id="recipeTitle">—</h1>
-            <p class="recipe-hero-sub" id="recipeSub">—</p>
+            <h1 id="recipeTitle">â€”</h1>
+            <p class="recipe-hero-sub" id="recipeSub">â€”</p>
 
             <ul class="recipe-meta">
-              <li><i data-lucide="clock"></i> <span id="recipeTotalTime">—</span></li>
-              <li><i data-lucide="flame"></i> <span id="recipeCookTime">—</span></li>
-              <li><i data-lucide="users"></i> <span id="recipeServings">—</span></li>
-              <li><i data-lucide="wallet"></i> <span id="recipeCost">—</span></li>
+              <li><i data-lucide="clock"></i> <span id="recipeTotalTime">â€”</span></li>
+              <li><i data-lucide="flame"></i> <span id="recipeCookTime">â€”</span></li>
+              <li><i data-lucide="users"></i> <span id="recipeServings">â€”</span></li>
+              <li><i data-lucide="wallet"></i> <span id="recipeCost">â€”</span></li>
             </ul>
           </div>
         </header>
@@ -225,7 +225,7 @@
             </div>
 
             <ul class="ingredient-list" id="ingredientList">
-              <li class="empty-state">Loading ingredients…</li>
+              <li class="empty-state">Loading ingredientsâ€¦</li>
             </ul>
 
             <!-- Instructions -->
@@ -234,7 +234,7 @@
             </h2>
 
             <ol class="instruction-list" id="instructionList">
-              <li class="empty-state">Loading instructions…</li>
+              <li class="empty-state">Loading instructionsâ€¦</li>
             </ol>
 
             <!-- Substitutions -->
@@ -287,11 +287,11 @@
               <div class="card-head">
                 <div>
                   <h3 class="card-title">Missing ingredients</h3>
-                  <p class="card-sub" id="missingSub">—</p>
+                  <p class="card-sub" id="missingSub">â€”</p>
                 </div>
               </div>
               <ul class="mini-list" id="missingList">
-                <li class="empty-state">None — you have everything!</li>
+                <li class="empty-state">None â€” you have everything!</li>
               </ul>
             </div>
 
@@ -304,7 +304,7 @@
                 </div>
               </div>
               <ul class="mini-list" id="availableList">
-                <li class="empty-state">—</li>
+                <li class="empty-state">â€”</li>
               </ul>
             </div>
 
@@ -331,19 +331,19 @@
               <ul class="mini-list meta-list">
                 <li id="metaCuisineRow" hidden>
                   <span class="meta-label">Cuisine</span>
-                  <span class="meta-value" id="metaCuisine">—</span>
+                  <span class="meta-value" id="metaCuisine">â€”</span>
                 </li>
                 <li id="metaCourseRow" hidden>
                   <span class="meta-label">Course</span>
-                  <span class="meta-value" id="metaCourse">—</span>
+                  <span class="meta-value" id="metaCourse">â€”</span>
                 </li>
                 <li id="metaPrepRow" hidden>
                   <span class="meta-label">Prep time</span>
-                  <span class="meta-value" id="metaPrep">—</span>
+                  <span class="meta-value" id="metaPrep">â€”</span>
                 </li>
                 <li id="metaTagsRow" hidden>
                   <span class="meta-label">Tags</span>
-                  <span class="meta-value" id="metaTags">—</span>
+                  <span class="meta-value" id="metaTags">â€”</span>
                 </li>
               </ul>
             </div>
@@ -368,11 +368,11 @@
 <div class="sidebar-overlay" id="sidebarOverlay" hidden></div>
 
 <!-- ==================== SCRIPTS ==================== -->
-<script src="assets/js/config.js"></script>
-<script src="assets/js/api.js"></script>
-<script src="assets/js/auth.js"></script>
-<script src="assets/js/layout.js"></script>
-<script src="assets/js/recipes.js"></script>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/auth.js"></script>
+<script src="/assets/js/layout.js"></script>
+<script src="/assets/js/recipes.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) lucide.createIcons();
