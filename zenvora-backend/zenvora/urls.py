@@ -1,8 +1,8 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.views.generic import TemplateView
+from django.views.static import serve
 from django.conf import settings
-from django.conf.urls.static import static
 
 urlpatterns = [
     # --- Admin & Auth ---
@@ -20,7 +20,12 @@ urlpatterns = [
     path('api/impact/', include('impact.urls')),
     path('api/assistant/', include('assistant.urls')),
 
-    # --- Frontend pages ---
+    # --- Serve Person 1's assets/ folder ---
+    re_path(r'^assets/(?P<path>.*)$', serve, {
+        'document_root': str(settings.FRONTEND_DIR / 'assets')
+    }),
+
+    # --- Frontend HTML pages ---
     path('', TemplateView.as_view(template_name='login.html'), name='home'),
     path('login.html', TemplateView.as_view(template_name='login.html')),
     path('register.html', TemplateView.as_view(template_name='register.html')),
@@ -42,6 +47,3 @@ urlpatterns = [
     path('dietary-profile.html', TemplateView.as_view(template_name='dietary-profile.html')),
     path('settings.html', TemplateView.as_view(template_name='settings.html')),
 ]
-
-# Serve Person 1's assets/ folder (CSS, JS, images)
-urlpatterns += static('/assets/', document_root=str(settings.FRONTEND_DIR / 'assets'))
