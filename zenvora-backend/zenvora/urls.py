@@ -15,13 +15,25 @@ urlpatterns = [
     path('api/impact/', include('impact.urls')),
     path('api/assistant/', include('assistant.urls')),
 
-    # Frontend pages
+    # ---- Frontend pages ----
     path('', TemplateView.as_view(template_name='login.html'), name='home'),
+    path('login.html', TemplateView.as_view(template_name='login.html')),
+    path('register.html', TemplateView.as_view(template_name='register.html')),
+    path('index.html', TemplateView.as_view(template_name='index.html')),
     path('dashboard.html', TemplateView.as_view(template_name='dashboard.html')),
+    path('pantry.html', TemplateView.as_view(template_name='pantry.html')),
     path('recipes.html', TemplateView.as_view(template_name='recipes.html')),
-    path('shelters.html', TemplateView.as_view(template_name='shelters.html')),
-    path('donations.html', TemplateView.as_view(template_name='donations.html')),
+    path('recipe-detail.html', TemplateView.as_view(template_name='recipe-detail.html')),
+    path('smart-cook.html', TemplateView.as_view(template_name='smart-cook.html')),
     path('scanner.html', TemplateView.as_view(template_name='scanner.html')),
+    path('shops.html', TemplateView.as_view(template_name='shops.html')),
+    path('shelter-connect.html', TemplateView.as_view(template_name='shelter-connect.html')),
+    path('food-map.html', TemplateView.as_view(template_name='food-map.html')),
+    path('donations.html', TemplateView.as_view(template_name='donations.html')),
+    path('notifications.html', TemplateView.as_view(template_name='notifications.html')),
     path('impact.html', TemplateView.as_view(template_name='impact.html')),
     path('assistant.html', TemplateView.as_view(template_name='assistant.html')),
+    path('profile.html', TemplateView.as_view(template_name='profile.html')),
+    path('dietary-profile.html', TemplateView.as_view(template_name='dietary-profile.html')),
+    path('settings.html', TemplateView.as_view(template_name='settings.html')),
 ]
