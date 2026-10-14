@@ -1,10 +1,15 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
+    # --- Admin & Auth ---
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
+
+    # --- APIs ---
     path('api/auth/', include('accounts.urls')),
     path('api/pantry/', include('pantry.urls')),
     path('api/recipes/', include('recipes.urls')),
@@ -15,7 +20,7 @@ urlpatterns = [
     path('api/impact/', include('impact.urls')),
     path('api/assistant/', include('assistant.urls')),
 
-    # ---- Frontend pages ----
+    # --- Frontend pages ---
     path('', TemplateView.as_view(template_name='login.html'), name='home'),
     path('login.html', TemplateView.as_view(template_name='login.html')),
     path('register.html', TemplateView.as_view(template_name='register.html')),
@@ -37,3 +42,6 @@ urlpatterns = [
     path('dietary-profile.html', TemplateView.as_view(template_name='dietary-profile.html')),
     path('settings.html', TemplateView.as_view(template_name='settings.html')),
 ]
+
+# Serve Person 1's assets/ folder (CSS, JS, images)
+urlpatterns += static('/assets/', document_root=str(settings.FRONTEND_DIR / 'assets'))
