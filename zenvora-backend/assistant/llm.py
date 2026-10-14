@@ -1,8 +1,13 @@
 """
 LLM wrapper for Ask ZENVORA.
-- Uses Groq (Llama 3.1 70B) for natural, contextual answers.
-- Falls back to NLP if the LLM fails (out of tokens, timeout, error).
-- Strict system prompt: LLM must answer ONLY from provided DB context.
+
+Order of attempts:
+1. Google Gemini (using GEMINI_LLM_KEY — Person 1's separate project)
+2. Google Gemini (using GEMINI_API_KEY  — fallback, shares project with scanner)
+3. Groq (using GROQ_API_KEY — legacy fallback)
+4. NLP (always works, no external service)
+
+Strict system prompt: LLM must answer ONLY from provided DB context.
 """
 
 import os
@@ -10,17 +15,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# --- Config -----------------------------------------------------------------
-# NOTE: This must be a valid Groq model ID. See https://console.groq.com/docs/models
-# Verified working models (as of writing):
-#   - llama-3.1-70b-versatile
-#   - llama-3.3-70b-versatile
-#   - llama-3.1-8b-instant
-LLM_MODEL = os.getenv('LLM_MODEL', 'llama-3.1-70b-versatile')
-
-LLM_TIMEOUT = float(os.getenv('LLM_TIMEOUT', '10'))   # seconds
-LLM_MAX_TOKENS = int(os.getenv('LLM_MAX_TOKENS', '200'))
-LLM_TEMPERATURE = float(os.getenv('LLM_TEMPERATURE', '0.3'))
+# ---------- Model config ----------
+GEMINI_MODEL = 'gemini-2.0-flash'
+GROQ_MODEL = 'openai/gpt-oss-120b'
+LLM_TIMEOUT = 15
 
 
 SYSTEM_PROMPT = """You are Ask ZENVORA, the assistant for a food rescue app.
@@ -30,86 +28,121 @@ Rules:
 2. If the context does not contain the answer, say:
    "I don't have that information. Try asking about pantry, recipes, shelters, donations, or impact."
 3. Keep answers short: 1-3 sentences.
-4. Do not output JSON — write a friendly, plain-English answer.
+4. Do not output JSON - write a friendly, plain-English answer.
 5. If the context mentions demo data, mention "(demo data)" in your answer.
 """
 
 
-def _client():
-    """Build a Groq client, or return None if unavailable."""
+# =========================================================
+# PUBLIC ENTRY POINT
+# =========================================================
+def ask_llm(question, db_context):
+    """
+    Try Gemini (Person 1's key) -> Gemini (shared key) -> Groq -> return None.
+    """
+    # 1. Gemini with Person 1's dedicated key
+    answer = _try_gemini(question, db_context, 'GEMINI_LLM_KEY', 'gemini-llm')
+    if answer:
+        return answer
+
+    # 2. Gemini with the shared scanner key
+    answer = _try_gemini(question, db_context, 'GEMINI_API_KEY', 'gemini-shared')
+    if answer:
+        return answer
+
+    # 3. Groq fallback
+    answer = _try_groq(question, db_context)
+    if answer:
+        return answer
+
+    # 4. Everything failed - caller will use NLP
+    return None
+
+
+# =========================================================
+# PROVIDER IMPLEMENTATIONS
+# =========================================================
+def _try_gemini(question, db_context, env_var, source_label):
+    """Try a Google Gemini call using the API key from the given env var."""
+    api_key = os.getenv(env_var, '').strip()
+    if not api_key:
+        logger.info(f'{env_var} not set - skipping {source_label}')
+        return None
+
+    try:
+        import google.generativeai as genai
+    except ImportError:
+        logger.warning('google-generativeai not installed - skipping Gemini')
+        return None
+
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel(GEMINI_MODEL)
+
+        prompt = (
+            f"{SYSTEM_PROMPT}\n\n"
+            f"Question: {question}\n\n"
+            f"Context (JSON):\n{db_context}"
+        )
+
+        response = model.generate_content(
+            prompt,
+            generation_config={
+                'temperature': 0.3,
+                'max_output_tokens': 300,
+            },
+        )
+        answer = (response.text or '').strip()
+        if answer:
+            logger.info(f'LLM answer via {source_label}')
+            return answer
+        return None
+    except Exception as e:
+        logger.warning(
+            f'Gemini call failed [{source_label} / model={GEMINI_MODEL}]: '
+            f'{type(e).__name__}: {e}'
+        )
+        return None
+
+
+def _try_groq(question, db_context):
+    """Legacy Groq fallback."""
     api_key = os.getenv('GROQ_API_KEY', '').strip()
     if not api_key:
-        logger.info('GROQ_API_KEY not set — using NLP fallback')
+        logger.info('GROQ_API_KEY not set - skipping Groq')
         return None
 
     try:
         from groq import Groq
     except ImportError:
-        logger.warning('groq package not installed — using NLP fallback')
+        logger.warning('groq package not installed - skipping Groq')
         return None
 
     try:
-        # `timeout` is supported in groq>=0.9. Older SDKs use `timeout` too,
-        # but if you hit a TypeError, upgrade: pip install -U groq
-        return Groq(api_key=api_key, timeout=LLM_TIMEOUT)
-    except Exception as e:
-        logger.warning(f'Failed to initialise Groq client: {e}')
-        return None
-
-
-def ask_llm(question, db_context):
-    """
-    Call Groq LLM with question + context.
-
-    Returns:
-        str  — the model's answer
-        None — if the LLM is unavailable (caller should use NLP fallback)
-    """
-    if not question or not str(question).strip():
-        logger.info('Empty question — skipping LLM call')
-        return None
-
-    client = _client()
-    if client is None:
-        return None
-
-    # Keep context bounded so we don't blow past token limits.
-    context_str = str(db_context) if db_context is not None else '{}'
-    if len(context_str) > 6000:
-        context_str = context_str[:6000] + '…[truncated]'
-        logger.info('DB context truncated to 6000 chars for LLM call')
-
-    try:
+        client = Groq(api_key=api_key, timeout=LLM_TIMEOUT)
         response = client.chat.completions.create(
-            model=LLM_MODEL,
+            model=GROQ_MODEL,
             messages=[
                 {'role': 'system', 'content': SYSTEM_PROMPT},
                 {
                     'role': 'user',
                     'content': (
                         f"Question: {question}\n\n"
-                        f"Context (JSON):\n{context_str}"
+                        f"Context (JSON):\n{db_context}"
                     ),
                 },
             ],
-            temperature=LLM_TEMPERATURE,
-            max_tokens=LLM_MAX_TOKENS,
+            temperature=0.3,
+            max_tokens=200,
         )
-
-        # Defensive extraction — Groq responses are usually well-formed,
-        # but we don't want a malformed one to crash the caller.
-        if not response or not getattr(response, 'choices', None):
-            logger.warning('LLM returned no choices — falling back to NLP')
-            return None
-
-        answer = (response.choices[0].message.content or '').strip()
-        if not answer:
-            logger.info('LLM returned empty answer — falling back to NLP')
-            return None
-
-        return answer
-
+        answer = response.choices[0].message.content.strip()
+        if answer:
+            logger.info('LLM answer via groq')
+            return answer
+        return None
     except Exception as e:
-        # Catches rate limits, token exhaustion, timeouts, network errors, etc.
-        logger.warning(f'LLM call failed, falling back to NLP: {e}')
+        logger.warning(
+            f'Groq call failed [model={GROQ_MODEL}]: '
+            f'{type(e).__name__}: {e}'
+        )
         return None
