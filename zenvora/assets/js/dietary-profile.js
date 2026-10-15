@@ -10,22 +10,20 @@
   function api()    { return Z.api || null; }
   function layout() { return Z.layout || null; }
 
-  function escapeHtml(s) {
+  function toast(msg, type) {
     var l = layout();
-    if (l && typeof l.escapeHtml === 'function') {
-      try { return l.escapeHtml(s); } catch (e) { /* fall through */ }
-    }
+    if (l && typeof l.toast === 'function') l.toast(msg, type);
+  }
+
+  function escapeHtmlSafe(s) {
+    var l = layout();
+    if (l && typeof l.escapeHtml === 'function') return l.escapeHtml(s);
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
-  }
-
-  function toast(msg, kind) {
-    var l = layout();
-    if (l && typeof l.toast === 'function') l.toast(msg, kind || 'info');
   }
 
   var current = {
@@ -41,18 +39,18 @@
   function init() {
     wireAllergyChips();
     wireDietChips();
-    wireChipInput('avoidInput', 'avoidChips', 'avoid');
-    wireChipInput('dislikeInput', 'dislikeChips', 'dislikes');
+    wireChipInput('avoidInput', 'avoidChips', current.avoid);
+    wireChipInput('dislikeInput', 'dislikeChips', current.dislikes);
     wireForm();
     load();
   }
 
   /* ---------- LOAD ---------- */
   function load() {
-    var apiRef = api();
-    if (!apiRef || !apiRef.dietary || typeof apiRef.dietary.get !== 'function') return;
+    var a = api();
+    if (!a || !a.dietary || typeof a.dietary.get !== 'function') return;
 
-    apiRef.dietary.get().then(function (data) {
+    a.dietary.get().then(function (data) {
       if (!data) return;
       current = normalize(data);
       applyToForm();
@@ -64,10 +62,10 @@
   function normalize(data) {
     data = data || {};
     return {
-      allergies: Array.isArray(data.allergies) ? data.allergies.slice() : [],
+      allergies: Array.isArray(data.allergies) ? data.allergies : [],
       diet:      data.diet || 'none',
-      avoid:     Array.isArray(data.avoid) ? data.avoid.slice() : [],
-      dislikes:  Array.isArray(data.dislikes) ? data.dislikes.slice() : [],
+      avoid:     Array.isArray(data.avoid) ? data.avoid : [],
+      dislikes:  Array.isArray(data.dislikes) ? data.dislikes : [],
       budget:    data.budget || 'medium',
       mealSize:  data.meal_size || data.mealSize || '1'
     };
@@ -143,67 +141,64 @@
   }
 
   /* ---------- CHIP INPUTS (avoid, dislikes) ---------- */
-  /* key is 'avoid' or 'dislikes' - looks up current[key] on each call so
-     reset() reassignments of `current` do not orphan the array. */
-  function wireChipInput(inputId, listId, key) {
+  function addValuesFromInput(input, listId, targetArr) {
+    if (!input) return;
+    var raw = input.value || '';
+    if (!raw.trim()) return;
+
+    var parts = raw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    var changed = false;
+    for (var i = 0; i < parts.length; i++) {
+      if (targetArr.indexOf(parts[i]) === -1) {
+        targetArr.push(parts[i]);
+        changed = true;
+      }
+    }
+    if (changed) renderChipList(listId, targetArr);
+    input.value = '';
+  }
+
+  function wireChipInput(inputId, listId, targetArr) {
     var input = document.getElementById(inputId);
     if (!input) return;
+
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault();
-        var v = input.value.trim();
-        if (!v) return;
-
-        var arr = current[key] || (current[key] = []);
-        var lower = v.toLowerCase();
-        var exists = arr.some(function (x) { return String(x).toLowerCase() === lower; });
-        if (!exists) {
-          arr.push(v);
-          renderChipList(listId, arr);
-        }
-        input.value = '';
+        addValuesFromInput(input, listId, targetArr);
       }
+    });
+
+    input.addEventListener('blur', function () {
+      addValuesFromInput(input, listId, targetArr);
     });
   }
 
-  /* DOM-built chip list - no innerHTML with user data, fully XSS-safe. */
   function renderChipList(listId, arr) {
     var wrap = document.getElementById(listId);
     if (!wrap) return;
 
-    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
-
+    var html = '';
     for (var i = 0; i < arr.length; i++) {
-      var v = String(arr[i]);
-
-      var chip = document.createElement('span');
-      chip.className = 'chip active';
-      chip.textContent = v;
-
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.setAttribute('aria-label', 'Remove');
-      btn.textContent = 'x';
-      btn.setAttribute('data-remove', v);
-
-      (function (value) {
-        btn.addEventListener('click', function () {
-          var list = current[keyForList(listId)] || [];
-          var idx = list.indexOf(value);
-          if (idx >= 0) list.splice(idx, 1);
-          renderChipList(listId, list);
-        });
-      })(v);
-
-      chip.appendChild(btn);
-      wrap.appendChild(chip);
+      var v = arr[i];
+      var safe = escapeHtmlSafe(v);
+      html += '<span class="chip active">' + safe
+            + '<button type="button" data-remove="' + safe + '" aria-label="Remove">&times;</button>'
+            + '</span>';
     }
-  }
+    wrap.innerHTML = html;
 
-  function keyForList(listId) {
-    if (listId === 'avoidChips') return 'avoid';
-    if (listId === 'dislikeChips') return 'dislikes';
-    return null;
+    var btns = wrap.querySelectorAll('[data-remove]');
+    for (var k = 0; k < btns.length; k++) {
+      (function (b) {
+        b.addEventListener('click', function () {
+          var v2 = b.getAttribute('data-remove');
+          var i2 = arr.indexOf(v2);
+          if (i2 >= 0) arr.splice(i2, 1);
+          renderChipList(listId, arr);
+        });
+      })(btns[k]);
+    }
   }
 
   /* ---------- FORM ---------- */
@@ -225,14 +220,14 @@
       /* Save locally as backup */
       try { localStorage.setItem('zenvora_dietary', JSON.stringify(current)); } catch (err) { /* ignore */ }
 
-      var apiRef = api();
-      if (!apiRef || !apiRef.dietary || typeof apiRef.dietary.update !== 'function') {
+      var a = api();
+      if (!a || !a.dietary || typeof a.dietary.update !== 'function') {
         toast('Preferences saved locally.', 'success');
         setLoading(btn, false);
         return;
       }
 
-      /* Mirror mealSize <-> meal_size for backend compatibility */
+      /* Send both camelCase and snake_case for backend compatibility */
       var payload = {
         allergies: current.allergies.slice(),
         diet:      current.diet,
@@ -243,11 +238,9 @@
         meal_size: current.mealSize
       };
 
-      apiRef.dietary.update(payload).then(function (res) {
-        if (res && res.offline) toast('Preferences saved locally.', 'info');
-        else toast('Preferences saved.', 'success');
+      a.dietary.update(payload).then(function () {
+        toast('Preferences saved.', 'success');
       }).catch(function (err) {
-        console.warn('[dietary] save failed:', err && err.message);
         toast((err && err.message) || 'Could not save preferences.', 'error');
       }).then(function () {
         setLoading(btn, false);
@@ -273,5 +266,4 @@
   }
 
   Z.dietaryProfile = { init: init };
-  Z.dietary        = { init: init };
 })();
