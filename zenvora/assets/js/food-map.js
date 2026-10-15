@@ -1,20 +1,107 @@
 /* ============================================================
-   ZENVORA — Food Map (Leaflet)
-   Uses CartoDB tiles because OpenStreetMap tiles are blocked on Render.
+   ZENVORA - Food Map (Leaflet)
+   Tiles: Esri World Street Map (free, no API key)
+   Fallback chain: Esri -> OSM France -> OSM Germany
+   Debug override: ?tiles=esri | ?tiles=osm-fr | ?tiles=osm-de
    ============================================================ */
 
 (function () {
   'use strict';
 
-  var Z = window.ZENVORA;
-  var api = Z.api;
-  var layout = Z.layout;
+  var Z = window.ZENVORA || {};
+
+  function api()    { return Z.api || null; }
+  function layout() { return Z.layout || null; }
+
+  function toast(msg, type) {
+    var l = layout();
+    if (l && typeof l.toast === 'function') l.toast(msg, type);
+  }
+
+  function escapeHtmlSafe(s) {
+    var l = layout();
+    if (l && typeof l.escapeHtml === 'function') return l.escapeHtml(s);
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function debounceSafe(fn, wait) {
+    var l = layout();
+    if (l && typeof l.debounce === 'function') return l.debounce(fn, wait);
+    var t;
+    return function () {
+      var ctx = this, args = arguments;
+      clearTimeout(t);
+      t = setTimeout(function () { fn.apply(ctx, args); }, wait || 150);
+    };
+  }
+
+  function lucideRefresh() {
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+  }
 
   var map = null;
   var markerLayer = null;
+  var userLayer = null;
   var markers = {};
   var allLocations = [];
   var userLocation = null;
+
+  /* ---------------------------------------------------------
+     TILE PROVIDERS (free, no API key)
+     --------------------------------------------------------- */
+  var TILE_PROVIDERS = [
+    {
+      name: 'esri',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+      opts: { maxZoom: 19, attribution: '&copy; Esri &copy; OpenStreetMap contributors' }
+    },
+    {
+      name: 'osm-fr',
+      url: 'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
+      opts: { maxZoom: 19, subdomains: 'abc', attribution: '&copy; OpenStreetMap France' }
+    },
+    {
+      name: 'osm-de',
+      url: 'https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png',
+      opts: { maxZoom: 19, subdomains: 'abc', attribution: '&copy; OpenStreetMap Germany' }
+    }
+  ];
+
+  function pickProviderIndex() {
+    try {
+      var override = new URLSearchParams(location.search).get('tiles');
+      if (override) {
+        for (var i = 0; i < TILE_PROVIDERS.length; i++) {
+          if (TILE_PROVIDERS[i].name === override) return i;
+        }
+      }
+    } catch (e) { /* ignore */ }
+    return 0;
+  }
+
+  function addTiles(m) {
+    var idx = pickProviderIndex();
+    var layer = L.tileLayer(TILE_PROVIDERS[idx].url, TILE_PROVIDERS[idx].opts).addTo(m);
+    var advancing = false;
+
+    layer.on('tileerror', function () {
+      if (advancing) return;
+      if (idx >= TILE_PROVIDERS.length - 1) return;
+      advancing = true;
+      try { m.removeLayer(layer); } catch (e) { /* ignore */ }
+      idx++;
+      console.warn('[food-map] tile provider failed, falling back to', TILE_PROVIDERS[idx].name);
+      layer = L.tileLayer(TILE_PROVIDERS[idx].url, TILE_PROVIDERS[idx].opts).addTo(m);
+      advancing = false;
+    });
+  }
 
   /* ---------------------------------------------------------
      DEMO locations (used only when backend has no coordinates)
@@ -49,13 +136,11 @@
 
     map = L.map('foodMap').setView([12.9716, 77.5946], 12);
 
-    /* CartoDB Voyager tiles — OpenStreetMap tiles are blocked on Render free tier */
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      maxZoom: 20,
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-    }).addTo(map);
+    /* Free tiles, no API key. Override with ?tiles=osm-fr for debugging. */
+    addTiles(map);
 
     markerLayer = L.layerGroup().addTo(map);
+    userLayer   = L.layerGroup().addTo(map);
 
     var status = document.getElementById('mapStatus');
     if (status) status.hidden = true;
@@ -67,23 +152,30 @@
   /* ---------------------------------------------------------
      LOAD LOCATIONS
      --------------------------------------------------------- */
+  function unwrap(data) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.results)) return data.results;
+    return [];
+  }
+
   function loadLocations() {
-    var shopsPromise    = (api.shops    && api.shops.list)    ? Promise.resolve(api.shops.list()).catch(function () { return []; })    : Promise.resolve([]);
-    var sheltersPromise = (api.shelters && api.shelters.list) ? Promise.resolve(api.shelters.list()).catch(function () { return []; }) : Promise.resolve([]);
+    var a = api();
+    var shopsPromise    = (a && a.shops    && a.shops.list)    ? Promise.resolve(a.shops.list()).catch(function () { return []; })    : Promise.resolve([]);
+    var sheltersPromise = (a && a.shelters && a.shelters.list) ? Promise.resolve(a.shelters.list()).catch(function () { return []; }) : Promise.resolve([]);
 
     Promise.all([shopsPromise, sheltersPromise]).then(function (results) {
-      var shops = results[0] || [];
-      var shelters = results[1] || [];
+      var shops = unwrap(results[0]);
+      var shelters = unwrap(results[1]);
 
       var list = [];
 
       shops.forEach(function (s) {
-        if (s.latitude != null && s.longitude != null) {
+        if (s && s.latitude != null && s.longitude != null) {
           list.push(normalizeLocation(s, 'shop'));
         }
       });
       shelters.forEach(function (s) {
-        if (s.latitude != null && s.longitude != null) {
+        if (s && s.latitude != null && s.longitude != null) {
           list.push(normalizeLocation(s, 'shelter'));
         }
       });
@@ -134,7 +226,7 @@
       });
 
       var marker = L.marker([loc.lat, loc.lng], { icon: icon }).addTo(markerLayer);
-      marker.bindPopup('<strong>' + layout.escapeHtml(loc.name) + '</strong><br>' + layout.escapeHtml(loc.address || ''));
+      marker.bindPopup('<strong>' + escapeHtmlSafe(loc.name) + '</strong><br>' + escapeHtmlSafe(loc.address || ''));
       marker.on('click', function () { showDetail(loc); });
 
       markers[loc.id] = marker;
@@ -152,7 +244,7 @@
 
     var searchEl = document.getElementById('mapSearch');
     if (searchEl) {
-      searchEl.addEventListener('input', layout.debounce(function () {
+      searchEl.addEventListener('input', debounceSafe(function () {
         applyFilters();
       }, 180));
     }
@@ -191,12 +283,12 @@
 
     var html = '';
     list.forEach(function (loc) {
-      html += '<li data-id="' + layout.escapeHtml(String(loc.id)) + '">'
+      html += '<li data-id="' + escapeHtmlSafe(String(loc.id)) + '">'
             +   '<div class="mini-body">'
-            +     '<p class="mini-title">' + layout.escapeHtml(loc.name) + '</p>'
-            +     '<p class="mini-sub">' + layout.escapeHtml(loc.address || '') + '</p>'
+            +     '<p class="mini-title">' + escapeHtmlSafe(loc.name) + '</p>'
+            +     '<p class="mini-sub">'   + escapeHtmlSafe(loc.address || '') + '</p>'
             +   '</div>'
-            +   '<span class="badge badge-info">' + layout.escapeHtml(loc.type) + '</span>'
+            +   '<span class="badge badge-info">' + escapeHtmlSafe(loc.type) + '</span>'
             + '</li>';
     });
     ul.innerHTML = html;
@@ -256,14 +348,14 @@
       if (loc.requirements && loc.requirements.length) {
         reqWrap.hidden = false;
         reqList.innerHTML = loc.requirements.map(function (r) {
-          return '<li>' + layout.escapeHtml(r) + '</li>';
+          return '<li>' + escapeHtmlSafe(r) + '</li>';
         }).join('');
       } else {
         reqWrap.hidden = true;
       }
     }
 
-    if (window.lucide) lucide.createIcons();
+    lucideRefresh();
   }
 
   function hideDetail() {
@@ -288,7 +380,7 @@
 
     var viewBtn = document.getElementById('detailViewFullBtn');
     if (viewBtn) viewBtn.addEventListener('click', function () {
-      layout.toast('Full location page coming soon.', 'info');
+      toast('Full location page coming soon.', 'info');
     });
   }
 
@@ -299,34 +391,40 @@
     var locateBtn = document.getElementById('locateMeBtn');
     if (locateBtn) locateBtn.addEventListener('click', function () {
       if (!('geolocation' in navigator)) {
-        layout.toast('Location is not supported in this browser.', 'warn');
+        toast('Location is not supported in this browser.', 'warn');
         return;
       }
-      layout.toast('Locating...', 'info', 1500);
+      toast('Locating...', 'info');
       navigator.geolocation.getCurrentPosition(function (pos) {
         userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+
         if (map) {
           map.setView([userLocation.lat, userLocation.lng], 14);
-          if (markerLayer) {
+          if (userLayer) {
+            userLayer.clearLayers();
             L.circleMarker([userLocation.lat, userLocation.lng], {
               radius: 8, color: '#2E5A7D', fillColor: '#2E5A7D', fillOpacity: 0.9
-            }).addTo(markerLayer).bindPopup('You are here');
+            }).addTo(userLayer).bindPopup('You are here');
           }
         }
-        layout.toast('Location found.', 'success');
+        toast('Location found.', 'success');
       }, function () {
-        layout.toast('Could not access your location.', 'warn');
+        toast('Could not access your location.', 'warn');
+      }, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
       });
     });
 
     var refreshBtn = document.getElementById('refreshMapBtn');
     if (refreshBtn) refreshBtn.addEventListener('click', function () {
-      layout.toast('Refreshing...', 'info', 1200);
+      toast('Refreshing...', 'info');
       loadLocations();
     });
 
-    var mapBtn  = document.getElementById('mapViewBtn');
-    var listBtn = document.getElementById('listViewBtn');
+    var mapBtn    = document.getElementById('mapViewBtn');
+    var listBtn   = document.getElementById('listViewBtn');
     var mapLayout = document.getElementById('mapLayout');
     var listView  = document.getElementById('mapListView');
 
