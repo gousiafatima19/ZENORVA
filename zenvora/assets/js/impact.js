@@ -15,7 +15,7 @@
     mealsSaved: 24,
     foodDelivered: 8,
     availableReserved: 3,
-    estimatedSavings: '₹ 1,240',
+    estimatedSavings: 'Rs. 1240',
     trend: [1, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7],
     breakdown: { delivered: 8, reserved: 2, available: 1 },
     pantryUsed: [3, 5, 2, 6, 4, 7]
@@ -42,17 +42,15 @@
     });
   }
 
-    function normalizeImpact(d) {
+  function normalizeImpact(d) {
     d = d || {};
 
-    /* The backend returns nested: verified.delivered.{donations_count, quantity_kg, estimated_meals, estimated_savings_inr} */
     var verified = d.verified || {};
     var demo     = d.demo     || {};
     var verifiedDelivered = verified.delivered || {};
     var demoDelivered     = demo.delivered     || {};
     var inProgress        = d.in_progress || {};
 
-    /* Prefer real verified data; fall back to demo data only if verified is empty */
     var realDonations   = Number(verifiedDelivered.donations_count || 0);
     var realMeals       = Number(verifiedDelivered.estimated_meals || 0);
     var realSavings     = Number(verifiedDelivered.estimated_savings_inr || 0);
@@ -72,7 +70,7 @@
       mealsSaved:        meals,
       foodDelivered:     delivered,
       availableReserved: inProg,
-      estimatedSavings:  savings > 0 ? ('₹ ' + savings) : '—',
+      estimatedSavings:  savings > 0 ? ('Rs. ' + savings) : '-',
       trend:             d.trend     || DEMO.trend,
       breakdown:         d.breakdown || {
                            delivered: delivered,
@@ -178,7 +176,7 @@
 
   function setText(id, v) {
     var el = document.getElementById(id);
-    if (el) el.textContent = v == null ? '—' : String(v);
+    if (el) el.textContent = (v == null) ? '-' : String(v);
   }
 
   Z.impact = { init: init };
