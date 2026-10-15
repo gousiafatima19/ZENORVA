@@ -127,6 +127,63 @@
     },
     remove: function (id) {
       return request("/api/pantry/" + id + "/", { method: "DELETE" });
+    },
+    expiring: function () {
+      return request("/api/pantry/expiring/").then(function (data) {
+        var arr = Array.isArray(data) ? data : (data.results || []);
+        return arr.map(fromBackend);
+      });
+    }
+  };
+
+  /* ---- Scanner resource (NEW) ---- */
+  Z.api.scan = {
+    /* POST /api/pantry/scan/ingredients/  — parse a text list */
+    ingredients: function (text) {
+      return request("/api/pantry/scan/ingredients/", {
+        method: "POST",
+        body: { text: text }
+      });
+    },
+
+    /* POST /api/pantry/scan/barcode/  — look up a barcode */
+    barcode: function (code) {
+      return request("/api/pantry/scan/barcode/", {
+        method: "POST",
+        body: { barcode: code }
+      });
+    },
+
+    /* POST /api/pantry/scan/image/  — upload an image file (multipart) */
+    image: function (file) {
+      var formData = new FormData();
+      formData.append("file", file);
+
+      /* NOTE: do NOT set Content-Type — the browser adds it with the boundary */
+      return fetch(config.API_BASE + "/api/pantry/scan/image/", {
+        method: "POST",
+        headers: {
+          "Authorization": "Token " + getToken()
+        },
+        body: formData
+      }).then(function (res) {
+        return res.text().then(function (txt) {
+          var data = null;
+          try { data = txt ? JSON.parse(txt) : null; } catch (e) { data = txt; }
+
+          if (!res.ok) {
+            var msg = (data && (data.error || data.detail || data.message)) || res.statusText || ("HTTP " + res.status);
+            console.error("Scan error", res.status, data);
+            throw new Error(msg);
+          }
+          return data;
+        });
+      }).catch(function (e) {
+        if (e.message && e.message.indexOf("Failed to fetch") !== -1) {
+          throw new Error("Cannot reach scanner — it may be waking up. Try again in 30 seconds.");
+        }
+        throw e;
+      });
     }
   };
 
@@ -147,6 +204,19 @@
     },
     get: function (id) {
       return request("/api/recipes/" + id + "/").then(normalizeRecipe);
+    },
+    search: function (q) {
+      var qs = q ? ("?q=" + encodeURIComponent(q)) : "";
+      return request("/api/recipes/search/" + qs).then(function (data) {
+        var arr = Array.isArray(data) ? data : (data.results || []);
+        return arr.map(normalizeRecipe);
+      });
+    },
+    shoppingList: function (recipeIds) {
+      return request("/api/recipes/shopping_list/", {
+        method: "POST",
+        body: { recipe_ids: recipeIds }
+      });
     },
     save: function (id) {
       return request("/api/recipes/" + id + "/save/", { method: "POST" })
@@ -176,14 +246,14 @@
       id:              r.id,
       title:           r.title || r.name || 'Untitled',
       subtitle:        r.subtitle || r.description || '',
-      image_url:       r.image_url || r.image || 'assets/images/recipe-placeholder.svg',
+      image_url:       r.image_url || r.image || 'assets/images/recipe-placeholder.png',
       difficulty:      r.difficulty || '',
       diet_tags:       r.diet_tags || r.dietary_tags || [],
       total_time_min:  r.total_time_min || r.prep_time || r.cooking_time_min || 0,
       cook_time_min:   r.cook_time_min  || r.cooking_time_min || 0,
       prep_time_min:   r.prep_time_min  || r.prep_time || 0,
       servings:        r.servings       || r.servings_count || 2,
-      estimated_cost:  r.estimated_cost || (r.cost != null ? '₹' + r.cost : ''),
+      estimated_cost:  r.estimated_cost || (r.cost != null ? 'Rs.' + r.cost : ''),
       cuisine:         r.cuisine || '',
       course:          r.course  || '',
       tags:            r.tags    || [],
@@ -194,6 +264,9 @@
       tips:            r.tips || [],
       dietary_warnings:  r.dietary_warnings || [],
       allergen_warnings: r.allergen_warnings || [],
+      missing:         r.missing || [],
+      have:            r.have || [],
+      match_ratio:     r.match_ratio || 0,
       is_demo:         r.is_demo
     };
   }
@@ -209,8 +282,15 @@
     get: function (id) {
       return request("/api/shops/" + id + "/").then(normalizeShop);
     },
+    nearby: function (lat, lng, radius) {
+      return request("/api/shops/nearby/?lat=" + lat + "&lng=" + lng + "&radius=" + (radius || 10))
+        .then(function (data) {
+          var arr = Array.isArray(data) ? data : (data.results || []);
+          return arr.map(normalizeShop);
+        });
+    },
     offers: function () {
-      return request("/api/offers/").then(function (data) {
+      return request("/api/shops/offers/").then(function (data) {
         return Array.isArray(data) ? data : (data.results || []);
       }).catch(function () { return []; });
     }
@@ -221,14 +301,18 @@
     return {
       id:            s.id,
       name:          s.name || 'Shop',
+      address:       s.address || '',
+      latitude:      s.latitude,
+      longitude:     s.longitude,
       category:      s.category || '',
       product:       s.product || s.product_name || '',
       price:         s.price != null ? s.price : null,
       originalPrice: s.original_price || s.originalPrice || null,
       unitPrice:     s.unit_price || s.unitPrice || '',
-      discount:      s.discount || '',
+      discount:      s.discount || s.discount_percent || '',
       distanceKm:    s.distance_km != null ? s.distance_km : (s.distanceKm != null ? s.distanceKm : null),
       favorite:      !!s.favorite,
+      offers:        s.offers || [],
       demo:          s.is_demo === true || s.demo === true
     };
   }
@@ -249,7 +333,19 @@
   }
 
   function sheltersNearby(lat, lng, radius) {
-    return request("/api/shelters/nearby/?lat=" + lat + "&lng=" + lng + "&radius=" + (radius || 5000));
+    return request("/api/shelters/nearby/?lat=" + lat + "&lng=" + lng + "&radius=" + (radius || 10))
+      .then(function (data) {
+        var arr = Array.isArray(data) ? data : (data.results || []);
+        return arr.map(normalizeShelter);
+      });
+  }
+
+  function sheltersSearch(q) {
+    var qs = q ? ("?q=" + encodeURIComponent(q)) : "";
+    return request("/api/shelters/search/" + qs).then(function (data) {
+      var arr = Array.isArray(data) ? data : (data.results || []);
+      return arr.map(normalizeShelter);
+    });
   }
 
   function normalizeShelter(s) {
@@ -258,19 +354,27 @@
       id:         s.id,
       name:       s.name || 'Shelter',
       address:    s.address || s.city || '',
+      latitude:   s.latitude,
+      longitude:  s.longitude,
       distanceKm: s.distance_km != null ? s.distance_km : (s.distanceKm != null ? s.distanceKm : null),
-      phone:      s.phone || '',
+      phone:      s.phone || s.contact || '',
+      contact:    s.contact || s.phone || '',
+      resident_count: s.resident_count || 0,
+      age_groups: s.age_groups || [],
       needs:      s.needs || s.requirements || [],
+      dietary_requirements: s.dietary_requirements || [],
+      allergy_flags: s.allergy_flags || [],
       urgency:    s.urgency || 'medium',
+      is_verified: s.is_verified || false,
       is_demo:    s.is_demo === true
     };
   }
 
-  /* Expose as BOTH callable function and object with methods */
   Z.api.shelters = function () { return sheltersList(); };
   Z.api.shelters.list    = sheltersList;
   Z.api.shelters.matches = sheltersMatches;
   Z.api.shelters.nearby  = sheltersNearby;
+  Z.api.shelters.search  = sheltersSearch;
 
   /* ---- Donations resource ---- */
   Z.api.donations = {
@@ -291,6 +395,27 @@
     update: function (id, payload) {
       return request("/api/donations/" + id + "/", { method: "PATCH", body: toBackendDonation(payload) }).then(normalizeDonation);
     },
+    matches: function (id) {
+      return request("/api/donations/" + id + "/matches/");
+    },
+    assign: function (id, shelterId) {
+      return request("/api/donations/" + id + "/assign/", {
+        method: "POST",
+        body: { shelter_id: shelterId }
+      }).then(normalizeDonation);
+    },
+    respond: function (id, response, note) {
+      return request("/api/donations/" + id + "/respond/", {
+        method: "POST",
+        body: { response: response, note: note || "" }
+      }).then(normalizeDonation);
+    },
+    updateStatus: function (id, status) {
+      return request("/api/donations/" + id + "/status/", {
+        method: "PATCH",
+        body: { status: status }
+      }).then(normalizeDonation);
+    },
     remove: function (id) {
       return request("/api/donations/" + id + "/", { method: "DELETE" });
     }
@@ -301,10 +426,11 @@
     return {
       food_type:    d.foodType    || d.food_type    || "",
       quantity:     d.quantity    || "",
+      unit:         d.unit        || "",
       packaging:    d.packaging   || "",
       storage:      d.storage     || "",
       preparation:  d.preparation || "",
-      deadline:     d.deadline    || "",
+      deadline:     d.deadline    || d.collection_deadline || "",
       location:     d.location    || "",
       shelter_id:   d.shelterId   || d.shelter_id   || null,
       status:       d.status      || "available"
@@ -317,6 +443,7 @@
       id:          d.id,
       foodType:    d.food_type || d.foodType || d.food || 'Donation',
       quantity:    d.quantity  || '',
+      unit:        d.unit      || '',
       packaging:   d.packaging || '',
       storage:     d.storage   || '',
       preparation: d.preparation || '',
@@ -326,17 +453,56 @@
       shelterName: d.shelter_name || d.shelterName || '',
       shelterId:   d.shelter_id || d.shelterId || null,
       donorName:   d.donor_name || d.donorName || '',
+      shelterResponse: d.shelter_response || 'pending',
+      shelterResponseNote: d.shelter_response_note || '',
+      allergenWarnings: d.allergen_warnings || [],
+      is_safe_guarantee: false,
       is_demo:     d.is_demo === true
     };
   }
 
   /* ---- Assistant, notifications, impact ---- */
-  Z.api.ask           = function (q) { return request("/api/assistant/ask/", { method: "POST", body: { question: q } }); };
-  Z.api.notifications = function () { return request("/api/notifications/"); };
-  Z.api.impact        = function () { return request("/api/impact/"); };
+  Z.api.ask = function (q) {
+    return request("/api/assistant/ask/", { method: "POST", body: { question: q } });
+  };
 
-  /* ---- Dietary profile ----
-     Tries multiple endpoint paths in case Person 2 used a different name. */
+  Z.api.notifications = function () {
+    return request("/api/notifications/").then(function (data) {
+      return Array.isArray(data) ? data : (data.results || []);
+    });
+  };
+
+  Z.api.notificationsUnread = function () {
+    return request("/api/notifications/unread-count/");
+  };
+
+  Z.api.markRead = function (id) {
+    return request("/api/notifications/" + id + "/read/", { method: "PATCH" });
+  };
+
+  Z.api.impact = function () { return request("/api/impact/"); };
+  Z.api.impactTrends = function (days) {
+    return request("/api/impact/trends/?days=" + (days || 7));
+  };
+
+  /* ---- Budget ---- */
+  Z.api.budget = {
+    get: function () { return request("/api/auth/budget/"); },
+    set: function (weeklyBudget) {
+      return request("/api/auth/budget/", {
+        method: "PUT",
+        body: { weekly_budget: weeklyBudget }
+      });
+    },
+    spend: function (amount, type) {
+      return request("/api/auth/budget/spend/", {
+        method: "POST",
+        body: { amount: amount, type: type || "actual" }
+      });
+    }
+  };
+
+  /* ---- Dietary profile ---- */
   var DIETARY_PATHS = ["/api/dietary-profile/", "/api/dietary/", "/api/profile/dietary/"];
 
   function tryPaths(paths, method, body) {
@@ -370,7 +536,7 @@
     update: function (data) { return tryPaths(DIETARY_PATHS, "PATCH", normalizeDietary(data)); }
   };
 
-  /* ---- ping: quick connectivity check (used by layout.js) ---- */
+  /* ---- ping: quick connectivity check ---- */
   Z.api.ping = function () {
     return request("/api/pantry/", { auth: true })
       .then(function () { return true; })
