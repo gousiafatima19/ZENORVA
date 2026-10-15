@@ -1,7 +1,6 @@
 /* =========================================================
    ZENVORA — Auth module
    Attaches to window.ZENVORA.auth
-   Provides login, register, guards, and initLoginPage()
    ========================================================= */
 
 (function () {
@@ -9,10 +8,7 @@
 
   var auth = {
 
-    /* ---- Guards ---- */
-    isAuthenticated: function () {
-      return !!Z.api.getToken();
-    },
+    isAuthenticated: function () { return !!Z.api.getToken(); },
 
     requireAuth: function () {
       if (!this.isAuthenticated()) {
@@ -24,7 +20,6 @@
       return true;
     },
 
-    /* If already signed in → send them to the app dashboard (not the landing page) */
     redirectIfAuthenticated: function () {
       if (this.isAuthenticated()) {
         window.location.href = "dashboard.html";
@@ -38,7 +33,6 @@
       window.location.href = "login.html";
     },
 
-    /* ---- Real login ---- */
     login: function (username, password) {
       return Z.api.post("/api/auth/login/",
         { username: username, password: password },
@@ -49,7 +43,6 @@
       });
     },
 
-    /* ---- Real register ---- */
     register: function (username, password, email) {
       return Z.api.post("/api/auth/register/",
         { username: username, password: password, email: email || "" },
@@ -60,12 +53,7 @@
       });
     },
 
-    /* =========================================================
-       Helpers used by layout.js
-       ========================================================= */
-    getUser: function () {
-      return Z.api.getUser();
-    },
+    getUser: function () { return Z.api.getUser(); },
 
     initialsFrom: function (user) {
       user = user || this.getUser();
@@ -94,44 +82,44 @@
       }
     },
 
+    /* Shared show/hide password wiring */
+    _wirePasswordToggle: function (toggle, input) {
+      if (!toggle || !input) return;
+      toggle.addEventListener("click", function () {
+        var isPwd = input.type === "password";
+        input.type = isPwd ? "text" : "password";
+        toggle.textContent = isPwd ? "Hide" : "Show";
+        toggle.setAttribute("aria-pressed", String(isPwd));
+      });
+    },
+
     /* =========================================================
-       initLoginPage()
-       Wires up the login form on login.html
+       Login page
        ========================================================= */
     initLoginPage: function () {
       var form    = document.getElementById("loginForm");
-      var emailIn = document.getElementById("email");
+      var userIn  = document.getElementById("username") || document.getElementById("email");
       var passIn  = document.getElementById("password");
       var btn     = document.getElementById("loginBtn");
       var alertEl = document.getElementById("authAlert");
       var toggle  = document.getElementById("togglePassword");
       var rememberEl = document.getElementById("remember");
 
-      if (!form || !emailIn || !passIn || !btn) {
+      if (!form || !userIn || !passIn || !btn) {
         console.warn("initLoginPage: missing elements");
         return;
       }
 
-      /* Restore remembered email */
+      this._wirePasswordToggle(toggle, passIn);
+
       try {
-        var saved = localStorage.getItem("zenvora_remembered_email");
+        var saved = localStorage.getItem("zenvora_remembered_username");
         if (saved && rememberEl) {
-          emailIn.value = saved;
+          userIn.value = saved;
           rememberEl.checked = true;
         }
       } catch (e) {}
 
-      /* Show / hide password toggle */
-      if (toggle) {
-        toggle.addEventListener("click", function () {
-          var isPwd = passIn.type === "password";
-          passIn.type = isPwd ? "text" : "password";
-          toggle.textContent = isPwd ? "Hide" : "Show";
-          toggle.setAttribute("aria-pressed", String(isPwd));
-        });
-      }
-
-      /* Submit handler */
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         submit();
@@ -143,34 +131,29 @@
         alertEl.className = "alert" + (kind === "success" ? " alert-success" : " alert-error");
         alertEl.hidden = false;
       }
-
-      function hideAlert() {
-        if (alertEl) alertEl.hidden = true;
-      }
+      function hideAlert() { if (alertEl) alertEl.hidden = true; }
 
       function setLoading(on) {
         btn.disabled = on;
         var label = btn.querySelector(".btn-label");
         var spin  = btn.querySelector(".btn-spinner");
-        if (label) label.textContent = on ? "Signing in…" : "Sign In";
+        if (label) label.textContent = on ? "Signing in..." : "Sign In";
         if (spin)  spin.hidden = !on;
       }
 
       function submit() {
         hideAlert();
-
-        var username = (emailIn.value || "").trim();
+        var username = (userIn.value || "").trim();
         var password = passIn.value || "";
 
-        if (!username) { showAlert("Please enter your username."); emailIn.focus(); return; }
+        if (!username) { showAlert("Please enter your username."); userIn.focus(); return; }
         if (!password) { showAlert("Please enter your password."); passIn.focus(); return; }
 
-        /* Remember username if checked */
         try {
           if (rememberEl && rememberEl.checked) {
-            localStorage.setItem("zenvora_remembered_email", username);
+            localStorage.setItem("zenvora_remembered_username", username);
           } else {
-            localStorage.removeItem("zenvora_remembered_email");
+            localStorage.removeItem("zenvora_remembered_username");
           }
         } catch (e) {}
 
@@ -178,7 +161,6 @@
 
         auth.login(username, password)
           .then(function () {
-            /* After successful login → go to dashboard.html (not index.html) */
             var next = sessionStorage.getItem(Z.config.SESSION_KEY) || "dashboard.html";
             sessionStorage.removeItem(Z.config.SESSION_KEY);
             window.location.href = next;
@@ -198,39 +180,89 @@
     },
 
     /* =========================================================
-       initRegisterPage()  — for register.html
+       Register page
        ========================================================= */
     initRegisterPage: function () {
-      var form    = document.getElementById("registerForm") || document.querySelector("form");
-      var userIn  = document.getElementById("username") || document.getElementById("email");
-      var emailIn = document.getElementById("email");
-      var passIn  = document.getElementById("password");
-      var btn     = document.querySelector('button[type="submit"]');
-      var alertEl = document.getElementById("authAlert");
+      var form      = document.getElementById("registerForm");
+      var nameIn    = document.getElementById("name");
+      var emailIn   = document.getElementById("email");
+      var passIn    = document.getElementById("password");
+      var confirmIn = document.getElementById("confirm");
+      var termsIn   = document.getElementById("terms");
+      var btn       = document.getElementById("registerBtn");
+      var alertEl   = document.getElementById("authAlert");
+      var toggle    = document.getElementById("togglePassword");
 
-      if (!form || !userIn || !passIn) return;
+      if (!form) {
+        console.warn("initRegisterPage: no registerForm");
+        return;
+      }
+
+      this._wirePasswordToggle(toggle, passIn);
 
       form.addEventListener("submit", function (e) {
         e.preventDefault();
-        var username = (userIn.value || "").trim();
-        var email    = emailIn ? (emailIn.value || "").trim() : "";
-        var password = passIn.value || "";
 
-        if (!username || !password) return;
+        if (alertEl) alertEl.hidden = true;
+        document.querySelectorAll(".error-msg").forEach(function (el) { el.textContent = ""; });
 
-        if (btn) { btn.disabled = true; }
+        var name     = (nameIn ? nameIn.value : "").trim();
+        var email    = (emailIn ? emailIn.value : "").trim();
+        var password = passIn ? passIn.value : "";
+        var confirm  = confirmIn ? confirmIn.value : "";
+
+        if (!name) { return showFieldError("name", "Please enter your full name.", nameIn); }
+        if (!email) { return showFieldError("email", "Please enter your email address.", emailIn); }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          return showFieldError("email", "Please enter a valid email address.", emailIn);
+        }
+        if (!password) { return showFieldError("password", "Please choose a password.", passIn); }
+        if (password.length < 8) {
+          return showFieldError("password", "Password must be at least 8 characters.", passIn);
+        }
+        if (confirmIn && password !== confirm) {
+          return showFieldError("confirm", "Passwords do not match.", confirmIn);
+        }
+        if (termsIn && !termsIn.checked) {
+          return showAlert("Please accept the terms to continue.", "error");
+        }
+
+        setLoading(true);
+
+        var username = email ? email.split("@")[0] : name.toLowerCase().replace(/\s+/g, "_");
+
         auth.register(username, password, email)
           .then(function () {
             window.location.href = "dashboard.html";
           })
           .catch(function (err) {
-            if (alertEl) {
-              alertEl.textContent = err.message || "Registration failed.";
-              alertEl.hidden = false;
-            }
-            if (btn) btn.disabled = false;
+            console.error(err);
+            showAlert(err.message || "Registration failed. Please try again.", "error");
+            setLoading(false);
           });
       });
+
+      function showAlert(msg, kind) {
+        if (!alertEl) { alert(msg); return; }
+        alertEl.textContent = msg;
+        alertEl.className = "alert" + (kind === "success" ? " alert-success" : " alert-error");
+        alertEl.hidden = false;
+      }
+
+      function showFieldError(field, msg, input) {
+        var el = document.querySelector('.error-msg[data-error="' + field + '"]');
+        if (el) el.textContent = msg;
+        if (input) input.focus();
+      }
+
+      function setLoading(on) {
+        if (!btn) return;
+        btn.disabled = on;
+        var label = btn.querySelector(".btn-label");
+        var spin  = btn.querySelector(".btn-spinner");
+        if (label) label.textContent = on ? "Creating account..." : "Create Account";
+        if (spin)  spin.hidden = !on;
+      }
     }
   };
 
