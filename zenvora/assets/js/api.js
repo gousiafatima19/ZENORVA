@@ -1,6 +1,5 @@
 /* =========================================================
    ZENVORA — API helper
-   Provides: .get .post .patch .del + resources
    ========================================================= */
 
 (function () {
@@ -25,7 +24,6 @@
     localStorage.removeItem(config.USER_KEY);
   }
 
-  /* Core fetch wrapper */
   function request(path, opts) {
     opts = opts || {};
     var method = opts.method || "GET";
@@ -47,7 +45,7 @@
         if (!res.ok) {
           if (res.status === 401 && auth) {
             clearSession();
-            throw new Error("Session expired — please sign in again.");
+            throw new Error("Session expired - please sign in again.");
           }
           var msg = (data && (data.error || data.detail || data.message)) || res.statusText || ("HTTP " + res.status);
           console.error("API error", res.status, path, data);
@@ -57,13 +55,12 @@
       });
     }).catch(function (e) {
       if (e.message && e.message.indexOf("Failed to fetch") !== -1) {
-        throw new Error("Cannot reach backend — it may be waking up. Try again in 30 seconds.");
+        throw new Error("Cannot reach backend - it may be waking up. Try again in 30 seconds.");
       }
       throw e;
     });
   }
 
-  /* Field mapping: frontend → backend */
   function toBackend(item) {
     if (!item) return item;
     var out = {};
@@ -95,7 +92,6 @@
     };
   }
 
-  /* ---- Public API ---- */
   Z.api = {
     get:   function (p, o)    { return request(p, Object.assign({ method: "GET" },    o || {})); },
     post:  function (p, b, o) { return request(p, Object.assign({ method: "POST",   body: b }, o || {})); },
@@ -108,7 +104,7 @@
     clearSession: clearSession
   };
 
-  /* ---- Pantry resource ---- */
+  /* ---- Pantry ---- */
   Z.api.pantry = {
     list: function () {
       return request("/api/pantry/").then(function (data) {
@@ -136,35 +132,27 @@
     }
   };
 
-  /* ---- Scanner resource (NEW) ---- */
+  /* ---- Scanner ---- */
   Z.api.scan = {
-    /* POST /api/pantry/scan/ingredients/  — parse a text list */
     ingredients: function (text) {
       return request("/api/pantry/scan/ingredients/", {
         method: "POST",
         body: { text: text }
       });
     },
-
-    /* POST /api/pantry/scan/barcode/  — look up a barcode */
     barcode: function (code) {
       return request("/api/pantry/scan/barcode/", {
         method: "POST",
         body: { barcode: code }
       });
     },
-
-    /* POST /api/pantry/scan/image/  — upload an image file (multipart) */
     image: function (file) {
       var formData = new FormData();
       formData.append("file", file);
 
-      /* NOTE: do NOT set Content-Type — the browser adds it with the boundary */
       return fetch(config.API_BASE + "/api/pantry/scan/image/", {
         method: "POST",
-        headers: {
-          "Authorization": "Token " + getToken()
-        },
+        headers: { "Authorization": "Token " + getToken() },
         body: formData
       }).then(function (res) {
         return res.text().then(function (txt) {
@@ -180,14 +168,14 @@
         });
       }).catch(function (e) {
         if (e.message && e.message.indexOf("Failed to fetch") !== -1) {
-          throw new Error("Cannot reach scanner — it may be waking up. Try again in 30 seconds.");
+          throw new Error("Cannot reach scanner - it may be waking up. Try again in 30 seconds.");
         }
         throw e;
       });
     }
   };
 
-  /* ---- Recipes resource ---- */
+  /* ---- Recipes ---- */
   Z.api.recipes = {
     list: function () {
       return request("/api/recipes/").then(function (data) {
@@ -246,14 +234,14 @@
       id:              r.id,
       title:           r.title || r.name || 'Untitled',
       subtitle:        r.subtitle || r.description || '',
-      image_url:       r.image_url || r.image || 'assets/images/recipe-placeholder.png',
+      image_url:       r.image_url || r.image || 'assets/images/recipe-placeholder.svg',
       difficulty:      r.difficulty || '',
       diet_tags:       r.diet_tags || r.dietary_tags || [],
       total_time_min:  r.total_time_min || r.prep_time || r.cooking_time_min || 0,
       cook_time_min:   r.cook_time_min  || r.cooking_time_min || 0,
       prep_time_min:   r.prep_time_min  || r.prep_time || 0,
       servings:        r.servings       || r.servings_count || 2,
-      estimated_cost:  r.estimated_cost || (r.cost != null ? 'Rs.' + r.cost : ''),
+      estimated_cost:  r.estimated_cost || (r.cost != null ? r.cost : ''),
       cuisine:         r.cuisine || '',
       course:          r.course  || '',
       tags:            r.tags    || [],
@@ -271,7 +259,7 @@
     };
   }
 
-  /* ---- Shops & Offers ---- */
+  /* ---- Shops ---- */
   Z.api.shops = {
     list: function () {
       return request("/api/shops/").then(function (data) {
@@ -298,6 +286,7 @@
 
   function normalizeShop(s) {
     if (!s) return s;
+    var offer = (s.offers && s.offers.length) ? s.offers[0] : {};
     return {
       id:            s.id,
       name:          s.name || 'Shop',
@@ -305,11 +294,11 @@
       latitude:      s.latitude,
       longitude:     s.longitude,
       category:      s.category || '',
-      product:       s.product || s.product_name || '',
-      price:         s.price != null ? s.price : null,
+      product:       offer.item_name || s.product || s.product_name || '',
+      price:         offer.price != null ? offer.price : (s.price != null ? s.price : null),
       originalPrice: s.original_price || s.originalPrice || null,
-      unitPrice:     s.unit_price || s.unitPrice || '',
-      discount:      s.discount || s.discount_percent || '',
+      unitPrice:     offer.unit_price != null ? ('Rs.' + offer.unit_price) : (s.unit_price || s.unitPrice || ''),
+      discount:      offer.discount_percent ? (offer.discount_percent + '% off') : (s.discount || ''),
       distanceKm:    s.distance_km != null ? s.distance_km : (s.distanceKm != null ? s.distanceKm : null),
       favorite:      !!s.favorite,
       offers:        s.offers || [],
@@ -317,7 +306,7 @@
     };
   }
 
-  /* ---- Shelters resource ---- */
+  /* ---- Shelters ---- */
   function sheltersList() {
     return request("/api/shelters/").then(function (data) {
       var arr = Array.isArray(data) ? data : (data.results || []);
@@ -376,7 +365,7 @@
   Z.api.shelters.nearby  = sheltersNearby;
   Z.api.shelters.search  = sheltersSearch;
 
-  /* ---- Donations resource ---- */
+  /* ---- Donations ---- */
   Z.api.donations = {
     list: function (opts) {
       var q = "";
@@ -502,7 +491,7 @@
     }
   };
 
-  /* ---- Dietary profile ---- */
+  /* ---- Dietary ---- */
   var DIETARY_PATHS = ["/api/dietary-profile/", "/api/dietary/", "/api/profile/dietary/"];
 
   function tryPaths(paths, method, body) {
@@ -536,7 +525,7 @@
     update: function (data) { return tryPaths(DIETARY_PATHS, "PATCH", normalizeDietary(data)); }
   };
 
-  /* ---- ping: quick connectivity check ---- */
+  /* ---- ping ---- */
   Z.api.ping = function () {
     return request("/api/pantry/", { auth: true })
       .then(function () { return true; })
