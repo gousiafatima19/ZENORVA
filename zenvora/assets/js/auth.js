@@ -82,7 +82,6 @@
       }
     },
 
-    /* Shared show/hide password wiring */
     _wirePasswordToggle: function (toggle, input) {
       if (!toggle || !input) return;
       toggle.addEventListener("click", function () {
@@ -93,9 +92,6 @@
       });
     },
 
-    /* =========================================================
-       Login page
-       ========================================================= */
     initLoginPage: function () {
       var form    = document.getElementById("loginForm");
       var userIn  = document.getElementById("username") || document.getElementById("email");
@@ -179,9 +175,6 @@
       }
     },
 
-    /* =========================================================
-       Register page
-       ========================================================= */
     initRegisterPage: function () {
       var form      = document.getElementById("registerForm");
       var nameIn    = document.getElementById("name");
