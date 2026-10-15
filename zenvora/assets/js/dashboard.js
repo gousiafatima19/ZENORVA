@@ -1,11 +1,6 @@
 /* ============================================================
    ZENVORA — Dashboard
-   Loads real data from the backend:
-     GET /api/pantry/         → count + expiring + recent
-     GET /api/notifications/  → bell + sidebar badges
-     GET /api/impact/         → food donated
-     GET /api/recipes/recommend/ → suggested recipes
-     GET /api/shelters/       → nearby preview
+   Loads real data from the backend.
    ============================================================ */
 
 (function () {
@@ -21,10 +16,7 @@
     const el = document.getElementById(id);
     if (el) el.textContent = text == null ? '' : String(text);
   }
-
-  function setMeta(id, text) {
-    setText(id, text);
-  }
+  function setMeta(id, text) { setText(id, text); }
 
   function daysUntil(dateStr) {
     if (!dateStr) return null;
@@ -36,16 +28,22 @@
   function expiryBadge(dateStr) {
     const d = daysUntil(dateStr);
     if (d == null) return { cls: 'muted', label: 'No date' };
-    if (d < 0)  return { cls: 'danger', label: 'Expired' };
+    if (d < 0)   return { cls: 'danger', label: 'Expired' };
     if (d === 0) return { cls: 'danger', label: 'Today' };
     if (d === 1) return { cls: 'warn',   label: '1 day' };
     if (d <= 3)  return { cls: 'warn',   label: d + ' days' };
     return { cls: 'success', label: d + ' days' };
   }
 
-  function initials() {
+  function displayName() {
     const u = auth.getUser() || {};
-    const n = u.username || u.name || 'ZK';
+    let n = u.username || u.name || u.email || 'there';
+    if (n.includes('@')) n = n.split('@')[0];
+    return n;
+  }
+
+  function initials() {
+    let n = displayName();
     const parts = String(n).trim().split(/[\s._-]+/).filter(Boolean);
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
     return String(n).substring(0, 2).toUpperCase();
@@ -66,92 +64,86 @@
       const items = await api.pantry.list();
       const total = items.length;
 
-      const expiring = items.filter((i) => {
+      const expiring = items.filter(function (i) {
         const d = daysUntil(i.expiry);
         return d != null && d >= 0 && d <= 3;
       }).length;
 
-      const expired = items.filter((i) => {
+      const expired = items.filter(function (i) {
         const d = daysUntil(i.expiry);
         return d != null && d < 0;
       }).length;
 
       setText('statPantry', total);
-      setMeta('statPantryMeta', total === 1 ? '1 item' : `${total} items`);
+      setMeta('statPantryMeta', total === 1 ? '1 item' : total + ' items');
 
       setText('statExpiring', expiring);
-      setMeta('statExpiringMeta', expired ? `${expired} expired` : 'next 3 days');
+      setMeta('statExpiringMeta', expired ? expired + ' expired' : 'next 3 days');
 
       renderExpiringList(items);
       renderRecentList(items);
     } catch (err) {
       console.warn('[dashboard] pantry load failed:', err && err.message);
-      setText('statPantry', '—');
+      setText('statPantry', '-');
       setMeta('statPantryMeta', 'Unavailable');
-      setText('statExpiring', '—');
+      setText('statExpiring', '-');
       setMeta('statExpiringMeta', 'Unavailable');
     }
   }
 
-  /* ---------------------------------------------------------
-     Expiring list
-     --------------------------------------------------------- */
   function renderExpiringList(items) {
     const box = document.getElementById('expiringList');
     if (!box) return;
 
     const soon = items
-      .map((i) => ({ item: i, d: daysUntil(i.expiry) }))
-      .filter((x) => x.d != null && x.d <= 3)
-      .sort((a, b) => a.d - b.d)
+      .map(function (i) { return { item: i, d: daysUntil(i.expiry) }; })
+      .filter(function (x) { return x.d != null && x.d <= 3; })
+      .sort(function (a, b) { return a.d - b.d; })
       .slice(0, 5);
 
     if (!soon.length) {
-      box.innerHTML = `<li class="empty-state">Nothing expiring in the next 3 days 🌿</li>`;
+      box.innerHTML = '<li class="empty-state">Nothing expiring in the next 3 days.</li>';
       return;
     }
 
-    box.innerHTML = soon.map(({ item, d }) => {
+    box.innerHTML = soon.map(function (x) {
+      const item = x.item;
       const b = expiryBadge(item.expiry);
       const demo = item.is_demo ? '<span class="badge badge-warn" style="margin-left:6px">DEMO</span>' : '';
-      return `<li class="mini-item">
-        <div class="mini-main">
-          <strong>${layout.escapeHtml(item.name)}</strong>${demo}
-          <span class="mini-sub">${layout.escapeHtml(String(item.quantity ?? ''))} ${layout.escapeHtml(item.unit || '')}</span>
-        </div>
-        <span class="badge badge-${b.cls}">${b.label}</span>
-      </li>`;
+      return '<li class="mini-item">'
+        + '<div class="mini-main">'
+        +   '<strong>' + layout.escapeHtml(item.name) + '</strong>' + demo
+        +   '<span class="mini-sub">' + layout.escapeHtml(String(item.quantity == null ? '' : item.quantity)) + ' ' + layout.escapeHtml(item.unit || '') + '</span>'
+        + '</div>'
+        + '<span class="badge badge-' + b.cls + '">' + b.label + '</span>'
+        + '</li>';
     }).join('');
 
     if (window.lucide) lucide.createIcons();
   }
 
-  /* ---------------------------------------------------------
-     Recently added list
-     --------------------------------------------------------- */
   function renderRecentList(items) {
     const box = document.getElementById('recentList');
     if (!box) return;
 
-    const recent = items
-      .slice()
-      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    const recent = items.slice()
+      .sort(function (a, b) { return new Date(b.createdAt || 0) - new Date(a.createdAt || 0); })
       .slice(0, 5);
 
     if (!recent.length) {
-      box.innerHTML = `<li class="empty-state">No items added yet.</li>`;
+      box.innerHTML = '<li class="empty-state">No items added yet.</li>';
       return;
     }
 
-    box.innerHTML = recent.map((i) => {
+    box.innerHTML = recent.map(function (i) {
       const b = expiryBadge(i.expiry);
-      return `<li class="mini-item">
-        <div class="mini-main">
-          <strong>${layout.escapeHtml(i.name)}</strong>
-          <span class="mini-sub">${layout.escapeHtml(String(i.quantity ?? ''))} ${layout.escapeHtml(i.unit || '')} · added ${layout.formatDate(i.createdAt)}</span>
-        </div>
-        <span class="badge badge-${b.cls}">${b.label}</span>
-      </li>`;
+      return '<li class="mini-item">'
+        + '<div class="mini-main">'
+        +   '<strong>' + layout.escapeHtml(i.name) + '</strong>'
+        +   '<span class="mini-sub">' + layout.escapeHtml(String(i.quantity == null ? '' : i.quantity)) + ' ' + layout.escapeHtml(i.unit || '') + ' · added ' + layout.formatDate(i.createdAt) + '</span>'
+        + '</div>'
+        + '<span class="badge badge-' + b.cls + '">' + b.label + '</span>'
+        + '</li>';
     }).join('');
   }
 
@@ -162,7 +154,7 @@
     try {
       const data = await api.notifications();
       const list = Array.isArray(data) ? data : (data.results || []);
-      const unread = list.filter((n) => n.is_read === false || n.unread === true).length;
+      const unread = list.filter(function (n) { return n.is_read === false || n.unread === true; }).length;
 
       const badge  = document.getElementById('notifBadge');
       const sidebar = document.getElementById('sidebarNotifBadge');
@@ -181,29 +173,21 @@
   }
 
   /* ---------------------------------------------------------
-     Impact (donations + savings)
+     Impact — FIXED to match API response structure
      --------------------------------------------------------- */
   async function loadImpact() {
     try {
       const data = await api.impact();
       if (!data) return;
 
-      const donated = data.donations_count ?? data.donated ?? data.total_donations;
-      const savings = data.estimated_savings ?? data.savings ?? data.money_saved;
+      const verifiedCount = (data.verified && data.verified.delivered)
+        ? data.verified.delivered.donations_count : 0;
+      const demoCount = (data.demo && data.demo.delivered)
+        ? data.demo.delivered.donations_count : 0;
+      const total = (verifiedCount || 0) + (demoCount || 0);
 
-      if (donated != null) {
-        setText('statDonated', donated);
-        setMeta('statDonatedMeta', donated === 1 ? 'meal donated' : 'meals donated');
-      } else {
-        setText('statDonated', 0);
-        setMeta('statDonatedMeta', 'meals donated');
-      }
-
-      // Optional extra: put savings into a sub-label if you have one
-      if (savings != null) {
-        const meta = document.getElementById('statPantryMeta');
-        if (meta) meta.textContent = `Est. savings ₹${savings}`;
-      }
+      setText('statDonated', total);
+      setMeta('statDonatedMeta', total === 1 ? 'meal donated' : 'meals donated');
     } catch (err) {
       console.warn('[dashboard] impact load failed:', err && err.message);
       setText('statDonated', 0);
@@ -219,9 +203,8 @@
     if (!box) return;
 
     try {
-      // Get pantry IDs first
       const items = await api.pantry.list();
-      const ids = items.map((i) => i.id);
+      const ids = items.map(function (i) { return i.id; });
 
       const data = await api.recipes.recommend(ids);
       const list = Array.isArray(data) ? data : (data.results || []);
@@ -230,39 +213,37 @@
       setMeta('statRecipesMeta', list.length === 1 ? 'recipe available' : 'recipes available');
 
       if (!list.length) {
-        box.innerHTML = `<p class="empty-state">No recipes yet. Add more to your pantry.</p>`;
+        box.innerHTML = '<p class="empty-state">No recipes yet. Add more to your pantry.</p>';
         return;
       }
 
-      box.innerHTML = list.slice(0, 4).map((r) => {
+      box.innerHTML = list.slice(0, 4).map(function (r) {
         const id = r.id;
-        const emoji = r.emoji || '🍲';
         const have = (r.have || []).length;
         const miss = (r.missing || []).length;
         const cost = r.cost || r.estimated_cost || 0;
         const time = r.prep_time || r.cooking_time_min || 0;
-        return `<a href="recipe-detail.html?id=${id}" class="recipe-mini">
-          <span class="recipe-mini-emoji">${emoji}</span>
-          <div class="recipe-mini-body">
-            <strong>${layout.escapeHtml(r.name)}</strong>
-            <span class="mini-sub">${time} min · ₹${cost}</span>
-            <span class="mini-sub">
-              ${have ? `✔ ${have} have` : ''}
-              ${miss ? ` · ✖ ${miss} missing` : ''}
-            </span>
-          </div>
-        </a>`;
+        return '<a href="recipe-detail.html?id=' + id + '" class="recipe-mini">'
+          + '<div class="recipe-mini-body">'
+          +   '<strong>' + layout.escapeHtml(r.name) + '</strong>'
+          +   '<span class="mini-sub">' + time + ' min - Rs.' + cost + '</span>'
+          +   '<span class="mini-sub">'
+          +     (have ? have + ' have' : '')
+          +     (miss ? ' - ' + miss + ' missing' : '')
+          +   '</span>'
+          + '</div>'
+          + '</a>';
       }).join('');
     } catch (err) {
       console.warn('[dashboard] recipes load failed:', err && err.message);
       setText('statRecipes', 0);
       setMeta('statRecipesMeta', 'recipes available');
-      box.innerHTML = `<p class="empty-state">Could not load recipes.</p>`;
+      box.innerHTML = '<p class="empty-state">Could not load recipes.</p>';
     }
   }
 
   /* ---------------------------------------------------------
-     Nearby (shelters)
+     Nearby shelters
      --------------------------------------------------------- */
   async function loadNearby() {
     const box = document.getElementById('nearbyList');
@@ -273,23 +254,23 @@
       const list = Array.isArray(data) ? data : (data.results || []);
 
       if (!list.length) {
-        box.innerHTML = `<li class="empty-state">No shelters nearby.</li>`;
+        box.innerHTML = '<li class="empty-state">No shelters nearby.</li>';
         return;
       }
 
-      box.innerHTML = list.slice(0, 4).map((s) => {
-        const dist = s.distance_km != null ? `${Number(s.distance_km).toFixed(1)} km` : '';
-        return `<li class="mini-item">
-          <div class="mini-main">
-            <strong>${layout.escapeHtml(s.name || 'Shelter')}</strong>
-            <span class="mini-sub">${layout.escapeHtml(s.address || s.city || '')}</span>
-          </div>
-          ${dist ? `<span class="mini-sub">${dist}</span>` : ''}
-        </li>`;
+      box.innerHTML = list.slice(0, 4).map(function (s) {
+        const dist = s.distance_km != null ? Number(s.distance_km).toFixed(1) + ' km' : '';
+        return '<li class="mini-item">'
+          + '<div class="mini-main">'
+          +   '<strong>' + layout.escapeHtml(s.name || 'Shelter') + '</strong>'
+          +   '<span class="mini-sub">' + layout.escapeHtml(s.address || s.city || '') + '</span>'
+          + '</div>'
+          + (dist ? '<span class="mini-sub">' + dist + '</span>' : '')
+          + '</li>';
       }).join('');
     } catch (err) {
       console.warn('[dashboard] shelters load failed:', err && err.message);
-      box.innerHTML = `<li class="empty-state">Could not load nearby.</li>`;
+      box.innerHTML = '<li class="empty-state">Could not load nearby.</li>';
     }
   }
 
@@ -300,32 +281,31 @@
     const box = document.getElementById('donationsPreview');
     if (!box) return;
 
-    // Try the donations endpoint if it exists; fall back gracefully.
     try {
       const data = await api.get('/api/donations/');
       const list = Array.isArray(data) ? data : (data.results || []);
       if (!list.length) {
-        box.innerHTML = `<li class="empty-state">No active donations.</li>`;
+        box.innerHTML = '<li class="empty-state">No active donations.</li>';
         return;
       }
-      box.innerHTML = list.slice(0, 4).map((d) => {
+      box.innerHTML = list.slice(0, 4).map(function (d) {
         const status = d.status || d.state || 'pending';
-        return `<li class="mini-item">
-          <div class="mini-main">
-            <strong>${layout.escapeHtml(d.food_type || d.item_name || 'Donation')}</strong>
-            <span class="mini-sub">${layout.escapeHtml(d.shelter_name || d.shelter || '')}</span>
-          </div>
-          <span class="badge badge-info">${layout.escapeHtml(status)}</span>
-        </li>`;
+        return '<li class="mini-item">'
+          + '<div class="mini-main">'
+          +   '<strong>' + layout.escapeHtml(d.food_type || d.item_name || 'Donation') + '</strong>'
+          +   '<span class="mini-sub">' + layout.escapeHtml(d.shelter_name || d.shelter || '') + '</span>'
+          + '</div>'
+          + '<span class="badge badge-info">' + layout.escapeHtml(status) + '</span>'
+          + '</li>';
       }).join('');
     } catch (err) {
       console.warn('[dashboard] donations load failed:', err && err.message);
-      box.innerHTML = `<li class="empty-state">No active donations.</li>`;
+      box.innerHTML = '<li class="empty-state">No active donations.</li>';
     }
   }
 
   /* ---------------------------------------------------------
-     Shopping list preview (uses pantry low-stock)
+     Shopping list preview
      --------------------------------------------------------- */
   async function loadShoppingList() {
     const box = document.getElementById('shoppingListPreview');
@@ -334,33 +314,34 @@
 
     try {
       const items = await api.pantry.list();
-      const low = items.filter((i) => {
+      const low = items.filter(function (i) {
         if (i.lowStockThreshold == null) return false;
         return Number(i.quantity || 0) <= Number(i.lowStockThreshold);
       });
 
-      if (summary) summary.textContent = low.length ? `${low.length} items to restock` : 'All good ✓';
+      if (summary) summary.textContent = low.length ? low.length + ' items to restock' : 'All good';
 
       if (!low.length) {
-        box.innerHTML = `<li class="empty-state">Nothing to restock right now.</li>`;
+        box.innerHTML = '<li class="empty-state">Nothing to restock right now.</li>';
         return;
       }
 
-      box.innerHTML = low.slice(0, 5).map((i) => `
-        <li class="mini-item">
-          <div class="mini-main">
-            <strong>${layout.escapeHtml(i.name)}</strong>
-            <span class="mini-sub">${layout.escapeHtml(String(i.quantity ?? ''))} ${layout.escapeHtml(i.unit || '')}</span>
-          </div>
-        </li>`).join('');
+      box.innerHTML = low.slice(0, 5).map(function (i) {
+        return '<li class="mini-item">'
+          + '<div class="mini-main">'
+          +   '<strong>' + layout.escapeHtml(i.name) + '</strong>'
+          +   '<span class="mini-sub">' + layout.escapeHtml(String(i.quantity == null ? '' : i.quantity)) + ' ' + layout.escapeHtml(i.unit || '') + '</span>'
+          + '</div>'
+          + '</li>';
+      }).join('');
     } catch (err) {
-      if (summary) summary.textContent = '—';
-      box.innerHTML = `<li class="empty-state">Could not load shopping list.</li>`;
+      if (summary) summary.textContent = '-';
+      box.innerHTML = '<li class="empty-state">Could not load shopping list.</li>';
     }
   }
 
   /* ---------------------------------------------------------
-     Weekly chart (last 7 days pantry added)
+     Weekly chart
      --------------------------------------------------------- */
   async function loadWeeklyChart() {
     const canvas = document.getElementById('weeklyChart');
@@ -376,7 +357,7 @@
         d.setHours(0,0,0,0);
         const next = new Date(d); next.setDate(d.getDate() + 1);
         const label = d.toLocaleDateString(undefined, { weekday: 'short' });
-        const count = items.filter((it) => {
+        const count = items.filter(function (it) {
           const created = new Date(it.createdAt || 0);
           return created >= d && created < next;
         }).length;
@@ -399,9 +380,7 @@
         options: {
           responsive: true,
           plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true, ticks: { precision: 0 } }
-          }
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
         }
       });
     } catch (err) {
@@ -415,9 +394,9 @@
   function loadWelcome() {
     const title = document.getElementById('welcomeTitle');
     const initialsEl = document.getElementById('avatarInitials');
-    const u = auth.getUser() || {};
-    const name = u.username || u.name || '';
-    if (title) title.textContent = `${greeting()}${name ? ', ' + name : ''} 👋`;
+    const name = displayName();
+
+    if (title) title.textContent = greeting() + (name ? ', ' + name : '');
     if (initialsEl) initialsEl.textContent = initials();
   }
 
