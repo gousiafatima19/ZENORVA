@@ -1,18 +1,25 @@
 /* ============================================================
-   ZENVORA — Smart Cook Mode
+   ZENVORA - Smart Cook Mode
    ------------------------------------------------------------
    Fully functional client-side cooking session:
      - Step timer (per-step duration from the recipe)
      - Separate check-in reminder (5 / 7 / 10 min)
      - Voice commands via Speech Recognition (with button fallback)
      - Spoken instructions via Speech Synthesis
-     - Never auto-advances on timer completion — user confirms.
+     - Never auto-advances on timer completion - user confirms.
    ============================================================ */
 
 (function () {
   'use strict';
 
-  const { api, layout } = window.ZENVORA;
+  const Z = window.ZENVORA || {};
+  const apiRef    = () => Z.api || null;
+  const layoutRef = () => Z.layout || null;
+
+  function toast(msg, type) {
+    const l = layoutRef();
+    if (l && typeof l.toast === 'function') l.toast(msg, type);
+  }
 
   // ---------------------------------------------------------
   // State
@@ -22,6 +29,7 @@
 
   let stepTimer = null;
   let stepSecondsLeft = 0;
+  let stepDeadline = 0;         // wall-clock deadline (ms)
   let stepTimerRunning = false;
 
   let reminderTimer = null;
@@ -30,6 +38,7 @@
 
   let voiceOn = false;
   let recognition = null;
+  let recognitionRestarting = false;
 
   // ---------------------------------------------------------
   // Demo recipe (clearly labelled)
@@ -63,13 +72,17 @@
   }
 
   async function loadRecipe(id) {
+    const api = apiRef();
     try {
+      if (!api || !api.recipes || typeof api.recipes.get !== 'function') {
+        throw new Error('api.recipes.get unavailable');
+      }
       const r = await api.recipes.get(id);
       recipe = normalizeRecipe(r);
     } catch (err) {
-      console.warn('[smart-cook] using demo:', err?.message);
+      console.warn('[smart-cook] using demo:', err && err.message);
       recipe = DEMO_RECIPE;
-      layout.toast('Using demo recipe — API not reachable.', 'warn');
+      toast('Using demo recipe - API not reachable.', 'warn');
     }
   }
 
@@ -77,35 +90,70 @@
     const wrap = document.getElementById('cookRecipePicker');
     if (!wrap) return;
 
-    api.recipes.list()
+    const api = apiRef();
+    let listPromise;
+
+    try {
+      if (api && api.recipes && typeof api.recipes.list === 'function') {
+        listPromise = api.recipes.list();
+      } else {
+        listPromise = Promise.reject(new Error('api.recipes.list unavailable'));
+      }
+    } catch (e) {
+      listPromise = Promise.reject(e);
+    }
+
+    listPromise
       .then((data) => {
-        const arr = Array.isArray(data) ? data : (data.results || []);
+        const arr = Array.isArray(data) ? data : ((data && data.results) || []);
         if (!arr.length) throw new Error('empty');
 
         wrap.innerHTML = arr.slice(0, 6).map((r) => `
           <a class="recipe-mini" href="smart-cook.html?id=${encodeURIComponent(r.id)}">
-            <div class="recipe-mini-title">${layout.escapeHtml(r.title || 'Recipe')}</div>
+            <div class="recipe-mini-title">${escapeHtmlSafe(r.title || 'Recipe')}</div>
             <p class="recipe-mini-meta">
-              ${r.total_time_min ? r.total_time_min + ' min' : ''}
+              ${r.total_time_min ? Number(r.total_time_min) + ' min' : ''}
             </p>
           </a>`).join('');
-        if (window.lucide) lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons();
       })
       .catch(() => {
         wrap.innerHTML = `
-          <a class="recipe-mini" href="smart-cook.html?id=${DEMO_RECIPE.id}">
-            <div class="recipe-mini-title">${DEMO_RECIPE.title}</div>
+          <a class="recipe-mini" href="smart-cook.html?id=${encodeURIComponent(DEMO_RECIPE.id)}">
+            <div class="recipe-mini-title">${escapeHtmlSafe(DEMO_RECIPE.title)}</div>
             <p class="recipe-mini-meta">demo recipe</p>
           </a>`;
-        if (window.lucide) lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons();
       });
   }
 
+  function escapeHtmlSafe(s) {
+    const l = layoutRef();
+    if (l && typeof l.escapeHtml === 'function') return l.escapeHtml(s);
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function normalizeRecipe(r) {
-    const steps = (r.instructions || r.steps || []).map((s) => {
+    if (!r) return DEMO_RECIPE;
+
+    let rawSteps = r.instructions || r.steps || [];
+
+    // Backend may return instructions as a single string
+    if (typeof rawSteps === 'string') {
+      rawSteps = rawSteps.split(/\r?\n+/).filter((s) => s.trim().length);
+    }
+
+    const steps = (rawSteps || []).map((s) => {
       if (typeof s === 'string') return { text: s, seconds: 60 };
-      return { text: s.text || '', seconds: s.seconds || 60 };
-    });
+      const secs = s.seconds || s.duration || s.time || (s.minutes ? s.minutes * 60 : 60);
+      return { text: s.text || s.instruction || '', seconds: secs || 60 };
+    }).filter((s) => s.text);
+
     return {
       id: r.id,
       title: r.title || 'Recipe',
@@ -117,8 +165,10 @@
   // Session
   // ---------------------------------------------------------
   function startSession() {
-    document.getElementById('cookSetup').hidden = true;
-    document.getElementById('cookSession').hidden = false;
+    const setup   = document.getElementById('cookSetup');
+    const session = document.getElementById('cookSession');
+    if (setup)   setup.hidden = true;
+    if (session) session.hidden = false;
 
     setText('cookRecipeTitle', recipe.title);
     setText('cookStepTotal', recipe.steps.length);
@@ -144,10 +194,10 @@
 
     stepSecondsLeft = step.seconds;
     stepTimerRunning = false;
+    stopStepTimer();
     updateTimerDisplay();
     setText('cookTimerHint', 'Tap "I\'m Ready" to start the step timer.');
-    stopStepTimer();
-    if (window.lucide) lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
   }
 
   function nextStep() {
@@ -171,39 +221,49 @@
   function finish() {
     stopStepTimer();
     stopReminders();
-    layout.toast('Cooking finished. Enjoy your meal!', 'success');
+    toast('Cooking finished. Enjoy your meal!', 'success');
     speak('Cooking finished. Enjoy your meal.');
   }
 
   // ---------------------------------------------------------
-  // Step timer (independent from reminders)
+  // Step timer (wall-clock based)
   // ---------------------------------------------------------
   function startStepTimer() {
     if (stepTimerRunning) return;
     stepTimerRunning = true;
+    stepDeadline = Date.now() + (stepSecondsLeft * 1000);
 
-    setText('cookTimerHint', 'Step timer running…');
-    document.getElementById('cookReadyBtn').disabled = true;
-    document.getElementById('cookPauseBtn').disabled = false;
+    setText('cookTimerHint', 'Step timer running...');
+
+    const readyBtn = document.getElementById('cookReadyBtn');
+    const pauseBtn = document.getElementById('cookPauseBtn');
+    if (readyBtn) readyBtn.disabled = true;
+    if (pauseBtn) pauseBtn.disabled = false;
 
     stepTimer = setInterval(() => {
-      stepSecondsLeft--;
+      stepSecondsLeft = Math.max(0, Math.ceil((stepDeadline - Date.now()) / 1000));
       updateTimerDisplay();
       if (stepSecondsLeft <= 0) {
         stopStepTimer();
         onStepTimerDone();
       }
-    }, 1000);
+    }, 250);
   }
 
   function pauseStepTimer() {
     if (!stepTimerRunning) return;
-    clearInterval(stepTimer);
+    if (stepTimer) clearInterval(stepTimer);
     stepTimer = null;
     stepTimerRunning = false;
+
+    // freeze remaining based on wall clock
+    stepSecondsLeft = Math.max(0, Math.ceil((stepDeadline - Date.now()) / 1000));
+
     setText('cookTimerHint', 'Paused.');
-    document.getElementById('cookReadyBtn').disabled = false;
-    document.getElementById('cookPauseBtn').disabled = true;
+    const readyBtn = document.getElementById('cookReadyBtn');
+    const pauseBtn = document.getElementById('cookPauseBtn');
+    if (readyBtn) readyBtn.disabled = false;
+    if (pauseBtn) pauseBtn.disabled = true;
   }
 
   function stopStepTimer() {
@@ -226,22 +286,23 @@
   }
 
   function updateTimerDisplay() {
-    const m = Math.floor(Math.max(stepSecondsLeft, 0) / 60);
-    const s = Math.max(stepSecondsLeft, 0) % 60;
+    const total = Math.max(stepSecondsLeft, 0);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
     setText('cookTimerDisplay',
       `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`);
   }
 
   function onStepTimerDone() {
-    layout.toast('Step timer done — please check the food.', 'warn');
+    toast('Step timer done - please check the food.', 'warn');
     speak('Step timer done. Please check the food.');
-    // Do NOT auto-advance — the user must confirm.
+    // Do NOT auto-advance - the user must confirm.
     setText('cookTimerHint',
       'Step timer finished. Check the food, then mark this step done.');
   }
 
   // ---------------------------------------------------------
-  // Check-in reminders (independent from step timer)
+  // Check-in reminders (wall-clock based, independent of step timer)
   // ---------------------------------------------------------
   function startReminders() {
     stopReminders();
@@ -252,7 +313,7 @@
       reminderSecondsLeft--;
       updateReminderDisplay();
       if (reminderSecondsLeft <= 0) {
-        layout.toast('Check in on your cooking.', 'info');
+        toast('Check in on your cooking.', 'info');
         speak('Check in on your cooking.');
         reminderSecondsLeft = reminderIntervalMin * 60;
         updateReminderDisplay();
@@ -266,10 +327,10 @@
   }
 
   function updateReminderDisplay() {
-    const m = Math.floor(Math.max(reminderSecondsLeft, 0) / 60);
-    const s = Math.max(reminderSecondsLeft, 0) % 60;
-    setText('cookReminderNext',
-      `${m}:${String(s).padStart(2, '0')}`);
+    const total = Math.max(reminderSecondsLeft, 0);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    setText('cookReminderNext', `${m}:${String(s).padStart(2, '0')}`);
   }
 
   // ---------------------------------------------------------
@@ -282,13 +343,13 @@
       const u = new SpeechSynthesisUtterance(String(text));
       u.rate = 0.98;
       u.pitch = 1;
-      speechSynthesis.cancel();
-      speechSynthesis.speak(u);
-    } catch { /* best effort */ }
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    } catch (e) { /* best effort */ }
   }
 
   function speakCurrentStep() {
-    const step = recipe.steps[stepIndex];
+    const step = recipe && recipe.steps[stepIndex];
     if (!step) return;
     speak(`Step ${stepIndex + 1}. ${step.text}`);
   }
@@ -307,6 +368,8 @@
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
       setText('cookVoiceHint', 'Speech recognition is not supported in this browser.');
+      voiceOn = false;
+      setText('cookVoiceLabel', 'Voice commands: Off');
       return;
     }
 
@@ -320,19 +383,41 @@
       handleVoiceCommand(last);
     };
 
-    recognition.onerror = () => {
-      setText('cookVoiceHint',
-        'Voice recognition error. You can still use the buttons.');
+    recognition.onerror = (e) => {
+      const err = e && e.error ? e.error : 'unknown';
+      if (err === 'not-allowed' || err === 'service-not-allowed') {
+        voiceOn = false;
+        setText('cookVoiceLabel', 'Voice commands: Off');
+        const btn = document.getElementById('cookVoiceToggle');
+        if (btn) btn.classList.remove('active');
+        setText('cookVoiceHint', 'Microphone access denied. Use the buttons.');
+      } else {
+        setText('cookVoiceHint',
+          'Voice recognition error. You can still use the buttons.');
+      }
     };
 
-    try { recognition.start(); } catch {}
+    recognition.onend = () => {
+      // Auto-restart while the user has voice enabled
+      if (voiceOn && !recognitionRestarting) {
+        recognitionRestarting = true;
+        setTimeout(() => {
+          recognitionRestarting = false;
+          if (voiceOn && recognition) {
+            try { recognition.start(); } catch (e) { /* ignore */ }
+          }
+        }, 300);
+      }
+    };
 
-    setText('cookVoiceHint', 'Listening for commands…');
+    try { recognition.start(); } catch (e) { /* ignore */ }
+
+    setText('cookVoiceHint', 'Listening for commands...');
   }
 
   function stopRecognition() {
     if (recognition) {
-      try { recognition.stop(); } catch {}
+      try { recognition.stop(); } catch (e) { /* ignore */ }
       recognition = null;
     }
     setText('cookVoiceHint', 'Voice commands off. You can use buttons.');
@@ -344,7 +429,7 @@
       speakCurrentStep();
       return;
     }
-    if (text.includes('pause')) {
+    if (text.includes('pause') || text.includes('stop')) {
       pauseStepTimer();
       return;
     }
@@ -360,6 +445,10 @@
       speak(`${Math.ceil(stepSecondsLeft)} seconds left.`);
       return;
     }
+    if (text.includes('end cooking') || text.includes('finish cooking')) {
+      finish();
+      return;
+    }
     if (text.includes("i'm done") || text.includes('done') || text.includes('finished')) {
       nextStep();
     }
@@ -369,52 +458,58 @@
   // Wire controls
   // ---------------------------------------------------------
   function wireControls() {
-    document.getElementById('cookReadyBtn')
-      ?.addEventListener('click', startStepTimer);
-    document.getElementById('cookPauseBtn')
-      ?.addEventListener('click', pauseStepTimer);
-    document.getElementById('cookResetTimerBtn')
-      ?.addEventListener('click', resetStepTimer);
-    document.getElementById('cookRepeatBtn')
-      ?.addEventListener('click', speakCurrentStep);
-    document.getElementById('cookSkipBtn')
-      ?.addEventListener('click', nextStep);
-    document.getElementById('cookPrevBtn')
-      ?.addEventListener('click', prevStep);
-    document.getElementById('cookCompleteStepBtn')
-      ?.addEventListener('click', () => { stopStepTimer(); nextStep(); });
-    document.getElementById('cookFinishBtn')
-      ?.addEventListener('click', finish);
-    document.getElementById('endCookBtn')
-      ?.addEventListener('click', () => {
-        if (confirm('Finish cooking?')) {
-          stopStepTimer();
-          stopReminders();
-          location.href = 'recipes.html';
-        }
-      });
-    document.getElementById('cookVoiceToggle')
-      ?.addEventListener('click', toggleVoice);
+    const on = (id, fn) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', fn);
+    };
 
-    document.getElementById('cookReminderInterval')
-      ?.addEventListener('change', (e) => {
+    on('cookReadyBtn', startStepTimer);
+    on('cookPauseBtn', pauseStepTimer);
+    on('cookResetTimerBtn', resetStepTimer);
+    on('cookRepeatBtn', speakCurrentStep);
+    on('cookSkipBtn', nextStep);
+    on('cookPrevBtn', prevStep);
+    on('cookCompleteStepBtn', () => { stopStepTimer(); nextStep(); });
+    on('cookFinishBtn', finish);
+    on('endCookBtn', () => {
+      if (confirm('Finish cooking?')) {
+        stopStepTimer();
+        stopReminders();
+        location.href = 'recipes.html';
+      }
+    });
+    on('cookVoiceToggle', toggleVoice);
+
+    const intervalSel = document.getElementById('cookReminderInterval');
+    if (intervalSel) {
+      intervalSel.addEventListener('change', (e) => {
         reminderIntervalMin = parseInt(e.target.value, 10) || 7;
         startReminders();
       });
+    }
 
-    // Keep the timer visually correct after tab-return
+    // Re-sync both timers when the tab becomes visible again
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && stepTimerRunning) updateTimerDisplay();
+      if (document.hidden) return;
+      if (stepTimerRunning) {
+        stepSecondsLeft = Math.max(0, Math.ceil((stepDeadline - Date.now()) / 1000));
+        updateTimerDisplay();
+        if (stepSecondsLeft <= 0) {
+          stopStepTimer();
+          onStepTimerDone();
+        }
+      }
+      updateReminderDisplay();
     });
   }
 
   function setText(id, v) {
     const el = document.getElementById(id);
-    if (el) el.textContent = v ?? '';
+    if (el) el.textContent = (v == null ? '' : String(v));
   }
 
   // ---------------------------------------------------------
   // Exports
   // ---------------------------------------------------------
-  window.ZENVORA.smartCook = { init };
+  (window.ZENVORA = window.ZENVORA || {}).smartCook = { init };
 })();
