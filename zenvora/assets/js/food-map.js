@@ -1,6 +1,6 @@
 /* ============================================================
    ZENVORA — Food Map (Leaflet)
-   Shows shops, shelters and pickup points on an interactive map.
+   Uses CartoDB tiles because OpenStreetMap tiles are blocked on Render.
    ============================================================ */
 
 (function () {
@@ -17,20 +17,17 @@
   var userLocation = null;
 
   /* ---------------------------------------------------------
-     DEMO locations (used if backend has no coordinates)
+     DEMO locations (used only when backend has no coordinates)
      --------------------------------------------------------- */
   var DEMO_LOCATIONS = [
-    { id: 'sh1', type: 'shop',    name: 'Green Grocer',      address: 'MG Road, Bengaluru',      lat: 12.9757, lng: 77.6068, hours: '9am – 9pm',   phone: '+91 90000 11111', is_demo: true },
-    { id: 'sh2', type: 'shop',    name: 'Fresh Bazaar',      address: 'Indiranagar, Bengaluru',  lat: 12.9784, lng: 77.6408, hours: '8am – 10pm',  phone: '+91 90000 22222', is_demo: true },
-    { id: 'sh3', type: 'shop',    name: 'Daily Needs',       address: 'Koramangala, Bengaluru',  lat: 12.9352, lng: 77.6245, hours: '7am – 11pm',  phone: '+91 90000 33333', is_demo: true },
-    { id: 'sl1', type: 'shelter', name: 'Hope Shelter',      address: 'Shivajinagar, Bengaluru', lat: 12.9857, lng: 77.6057, hours: 'Open 24h',    phone: '+91 90000 44444', is_demo: true, requirements: ['Cooked meals', 'Fruits'] },
-    { id: 'sl2', type: 'shelter', name: 'Sunrise Foundation', address: 'Jayanagar, Bengaluru',   lat: 12.9299, lng: 77.5827, hours: '8am – 8pm',   phone: '+91 90000 55555', is_demo: true, requirements: ['Packaged food', 'Vegetables'] },
-    { id: 'pk1', type: 'pickup',  name: 'Community Center',  address: 'Richmond Town, Bengaluru', lat: 12.9634, lng: 77.6042, hours: '10am – 6pm',  phone: '', is_demo: true }
+    { id: 'sh1', type: 'shop',    name: 'Green Grocer',       address: 'MG Road, Bengaluru',       lat: 12.9757, lng: 77.6068, hours: '9am - 9pm',  phone: '+91 90000 11111', is_demo: true },
+    { id: 'sh2', type: 'shop',    name: 'Fresh Bazaar',       address: 'Indiranagar, Bengaluru',   lat: 12.9784, lng: 77.6408, hours: '8am - 10pm', phone: '+91 90000 22222', is_demo: true },
+    { id: 'sh3', type: 'shop',    name: 'Daily Needs',        address: 'Koramangala, Bengaluru',   lat: 12.9352, lng: 77.6245, hours: '7am - 11pm', phone: '+91 90000 33333', is_demo: true },
+    { id: 'sl1', type: 'shelter', name: 'Hope Shelter',       address: 'Shivajinagar, Bengaluru',  lat: 12.9857, lng: 77.6057, hours: 'Open 24h',   phone: '+91 90000 44444', is_demo: true, requirements: ['Cooked meals', 'Fruits'] },
+    { id: 'sl2', type: 'shelter', name: 'Sunrise Foundation', address: 'Jayanagar, Bengaluru',     lat: 12.9299, lng: 77.5827, hours: '8am - 8pm',  phone: '+91 90000 55555', is_demo: true, requirements: ['Packaged food', 'Vegetables'] },
+    { id: 'pk1', type: 'pickup',  name: 'Community Center',   address: 'Richmond Town, Bengaluru', lat: 12.9634, lng: 77.6042, hours: '10am - 6pm', phone: '', is_demo: true }
   ];
 
-  /* ---------------------------------------------------------
-     INIT
-     --------------------------------------------------------- */
   function init() {
     initMap();
     wireFilters();
@@ -44,20 +41,27 @@
      --------------------------------------------------------- */
   function initMap() {
     var el = document.getElementById('foodMap');
-    if (!el || !window.L) return;
+    if (!el) return;
+    if (!window.L) {
+      console.warn('[food-map] Leaflet not loaded');
+      return;
+    }
 
     map = L.map('foodMap').setView([12.9716, 77.5946], 12);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
+    /* CartoDB Voyager tiles — OpenStreetMap tiles are blocked on Render free tier */
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 20,
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
     }).addTo(map);
 
     markerLayer = L.layerGroup().addTo(map);
 
-    /* Status: hide the loader */
     var status = document.getElementById('mapStatus');
     if (status) status.hidden = true;
+
+    /* Force Leaflet to recalculate size (fixes blank map on desktop) */
+    setTimeout(function () { if (map) map.invalidateSize(); }, 200);
   }
 
   /* ---------------------------------------------------------
@@ -84,7 +88,6 @@
         }
       });
 
-      /* Fallback to demo data if the backend returned nothing with coordinates */
       if (!list.length) list = DEMO_LOCATIONS;
 
       allLocations = list;
@@ -102,7 +105,7 @@
       lat:          item.latitude  != null ? Number(item.latitude)  : Number(item.lat),
       lng:          item.longitude != null ? Number(item.longitude) : Number(item.lng),
       hours:        item.hours || '',
-      phone:        item.phone || '',
+      phone:        item.phone || item.contact || '',
       requirements: item.requirements || item.needs || [],
       is_demo:      item.is_demo === true
     };
@@ -119,7 +122,10 @@
     list.forEach(function (loc) {
       if (!isFinite(loc.lat) || !isFinite(loc.lng)) return;
 
-      var color = loc.type === 'shop' ? '#254B3B' : (loc.type === 'shelter' ? '#D4AF57' : '#2E5A7D');
+      var color = loc.type === 'shop'
+        ? '#254B3B'
+        : (loc.type === 'shelter' ? '#D4AF57' : '#2E5A7D');
+
       var icon = L.divIcon({
         className: 'zenvora-marker',
         html: '<div style="background:' + color + ';width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>',
@@ -219,7 +225,7 @@
 
     setText('detailType', loc.type);
     setText('detailName', loc.name);
-    setText('detailAddress', loc.address || '—');
+    setText('detailAddress', loc.address || '-');
 
     var distRow = document.getElementById('detailDistanceRow');
     if (distRow) {
@@ -296,14 +302,16 @@
         layout.toast('Location is not supported in this browser.', 'warn');
         return;
       }
-      layout.toast('Locating…', 'info', 1500);
+      layout.toast('Locating...', 'info', 1500);
       navigator.geolocation.getCurrentPosition(function (pos) {
         userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         if (map) {
           map.setView([userLocation.lat, userLocation.lng], 14);
-          L.circleMarker([userLocation.lat, userLocation.lng], {
-            radius: 8, color: '#2E5A7D', fillColor: '#2E5A7D', fillOpacity: 0.9
-          }).addTo(markerLayer).bindPopup('You are here');
+          if (markerLayer) {
+            L.circleMarker([userLocation.lat, userLocation.lng], {
+              radius: 8, color: '#2E5A7D', fillColor: '#2E5A7D', fillOpacity: 0.9
+            }).addTo(markerLayer).bindPopup('You are here');
+          }
         }
         layout.toast('Location found.', 'success');
       }, function () {
@@ -313,7 +321,7 @@
 
     var refreshBtn = document.getElementById('refreshMapBtn');
     if (refreshBtn) refreshBtn.addEventListener('click', function () {
-      layout.toast('Refreshing…', 'info', 1200);
+      layout.toast('Refreshing...', 'info', 1200);
       loadLocations();
     });
 
@@ -344,7 +352,7 @@
      --------------------------------------------------------- */
   function setText(id, v) {
     var el = document.getElementById(id);
-    if (el) el.textContent = v == null ? '—' : String(v);
+    if (el) el.textContent = v == null ? '-' : String(v);
   }
 
   function haversine(lat1, lon1, lat2, lon2) {
@@ -357,8 +365,5 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  /* ---------------------------------------------------------
-     EXPORT
-     --------------------------------------------------------- */
   Z.foodMap = { init: init };
 })();
