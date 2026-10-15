@@ -5,7 +5,7 @@
 window.ZENVORA = window.ZENVORA || {};
 
 window.ZENVORA.config = {
-  API_BASE: "https://zenorva.onrender.com",
+  API_BASE: "",
   TOKEN_KEY: "zenvora_token",
   USER_KEY: "zenvora_user",
   SESSION_KEY: "zenvora_after_login",
