@@ -1,6 +1,7 @@
 /* ============================================================
    ZENVORA — Food Scanner
-   Flexible ID matching — works with multiple HTML layouts.
+   Sends image to backend Gemini Vision endpoint.
+   Falls back to manual ingredient entry if unavailable.
    ============================================================ */
 
 (function () {
@@ -23,16 +24,6 @@
     return null;
   }
 
-  /* ---------- Helper: query by any selector ---------- */
-  function query() {
-    var args = Array.prototype.slice.call(arguments);
-    for (var i = 0; i < args.length; i++) {
-      var el = document.querySelector(args[i]);
-      if (el) return el;
-    }
-    return null;
-  }
-
   function init() {
     wireUpload();
     wireActions();
@@ -40,15 +31,14 @@
 
   function wireUpload() {
     var dropzone  = find('scannerDropzone', 'dropzone', 'uploadZone', 'uploadArea');
-    var fileInput = find('scannerFileInput', 'fileInput', 'imageInput', 'uploadInput');
+    var fileInput = find('scannerFile', 'scannerFileInput', 'fileInput', 'imageInput');
 
-    /* If no file input exists, create a hidden one */
     if (!fileInput) {
       fileInput = document.createElement('input');
       fileInput.type = 'file';
       fileInput.accept = 'image/*';
       fileInput.style.display = 'none';
-      fileInput.id = 'scannerFileInput';
+      fileInput.id = 'scannerFile';
       document.body.appendChild(fileInput);
     }
 
@@ -74,9 +64,6 @@
     fileInput.addEventListener('change', function (e) {
       if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
     });
-
-    var clearBtn = find('clearPreviewBtn', 'clearPreview');
-    if (clearBtn) clearBtn.addEventListener('click', clearPreview);
   }
 
   function handleFile(file) {
@@ -88,16 +75,16 @@
 
     var reader = new FileReader();
     reader.onload = function (e) {
-      var img  = find('scannerPreviewImg', 'previewImg', 'imagePreview');
-      var wrap = find('scannerPreviewWrap', 'previewWrap', 'scannerPreview');
+      var img  = find('previewImage', 'scannerPreviewImg', 'previewImg');
+      var wrap = find('scannerPreview', 'scannerPreviewWrap', 'previewWrap');
       if (img)  img.src = e.target.result;
       if (wrap) wrap.hidden = false;
 
-      var actions = find('scannerActions', 'scannerActionBar');
-      if (actions) actions.hidden = false;
+      var scanBtn = find('scanBtn', 'scanProductBtn', 'scanImageBtn');
+      if (scanBtn) scanBtn.disabled = false;
 
-      /* Auto-trigger the scan */
-      setTimeout(runScan, 100);
+      var emptyState = find('scanEmptyState');
+      if (emptyState) emptyState.hidden = true;
     };
     reader.readAsDataURL(file);
   }
@@ -106,121 +93,187 @@
     selectedFile = null;
     parsedResult = null;
 
-    var img  = find('scannerPreviewImg', 'previewImg', 'imagePreview');
+    var img  = find('previewImage', 'scannerPreviewImg', 'previewImg');
     if (img) img.src = '';
-    var wrap = find('scannerPreviewWrap', 'previewWrap');
+    var wrap = find('scannerPreview', 'scannerPreviewWrap');
     if (wrap) wrap.hidden = true;
 
-    var fileInput = find('scannerFileInput', 'fileInput', 'imageInput');
+    var fileInput = find('scannerFile', 'scannerFileInput', 'fileInput');
     if (fileInput) fileInput.value = '';
+
+    var scanBtn = find('scanBtn', 'scanProductBtn');
+    if (scanBtn) scanBtn.disabled = true;
+
+    var emptyState = find('scanEmptyState');
+    if (emptyState) emptyState.hidden = false;
+
+    var resultForm = find('scanResultForm');
+    if (resultForm) resultForm.hidden = true;
+
+    var errorState = find('scanErrorState');
+    if (errorState) errorState.hidden = true;
   }
 
   function wireActions() {
-    var scanBtn = find('scanProductBtn', 'scanBtn', 'scanImageBtn');
-    if (scanBtn) scanBtn.addEventListener('click', function () {
-      /* Try clicking the hidden file input */
-      var fileInput = find('scannerFileInput', 'fileInput', 'imageInput');
-      if (fileInput) fileInput.click();
-      else runScan();
-    });
+    /* SCAN BUTTON — triggers the actual backend call */
+    var scanBtn = find('scanBtn', 'scanProductBtn', 'scanImageBtn');
+    if (scanBtn) {
+      scanBtn.addEventListener('click', function () {
+        if (selectedFile) {
+          runScan();
+        } else {
+          var fileInput = find('scannerFile', 'scannerFileInput', 'fileInput');
+          if (fileInput) fileInput.click();
+        }
+      });
+    }
 
-    var barcodeBtn = find('scanBarcodeBtn', 'barcodeBtn');
-    if (barcodeBtn) barcodeBtn.addEventListener('click', function () {
-      layout.toast('Barcode scanning coming soon.', 'info');
-    });
+    var clearBtn = find('clearPreview', 'clearPreviewBtn');
+    if (clearBtn) clearBtn.addEventListener('click', clearPreview);
 
-    var resetBtn = find('resetScanBtn', 'resetBtn');
-    if (resetBtn) resetBtn.addEventListener('click', clearPreview);
+    var retryBtn = find('retryScanBtn');
+    if (retryBtn) retryBtn.addEventListener('click', runScan);
   }
 
   function runScan() {
     if (!selectedFile) {
-      /* No file uploaded yet — trigger the file picker instead */
-      var fileInput = find('scannerFileInput', 'fileInput', 'imageInput');
-      if (fileInput) fileInput.click();
+      layout.toast('Please select an image first.', 'warn');
       return;
     }
-    var btn = find('scanProductBtn', 'scanBtn', 'scanImageBtn');
+
+    var btn = find('scanBtn', 'scanProductBtn', 'scanImageBtn');
     if (btn) btn.disabled = true;
 
-    var results = find('scannerResults', 'scanResults', 'results');
-    if (results) {
-      results.innerHTML = '<div class="empty-state-block"><i data-lucide="loader-2" class="spin"></i><p>Analysing image…</p></div>';
+    showLoading();
+
+    /* ---- CALL THE REAL BACKEND ---- */
+    Z.api.scan.image(selectedFile)
+      .then(function (result) {
+        parsedResult = {
+          name: 'Scanned Product',
+          category: 'packaged',
+          quantity: 1,
+          unit: 'pack',
+          expiry: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+          ingredients: result.ingredients_parsed || [],
+          confidence: result.confidence || 'low',
+          notes: result.notes || '',
+          allergen_conflicts: result.allergen_conflicts || [],
+          is_safe_guarantee: false,
+          warning: result.warning || '',
+          is_demo: false
+        };
+        renderResults(parsedResult);
+        if (btn) btn.disabled = false;
+      })
+      .catch(function (err) {
+        console.error('Scan failed:', err);
+        showError(err && err.message ? err.message : 'Could not analyze image.');
+        if (btn) btn.disabled = false;
+      });
+  }
+
+  function showLoading() {
+    var emptyState = find('scanEmptyState');
+    if (emptyState) emptyState.hidden = true;
+
+    var errorState = find('scanErrorState');
+    if (errorState) errorState.hidden = true;
+
+    var resultForm = find('scanResultForm');
+    if (resultForm) resultForm.hidden = true;
+
+    var loading = find('scanLoadingState');
+    if (loading) {
+      loading.hidden = false;
       if (window.lucide) lucide.createIcons();
     }
+  }
 
-    setTimeout(function () {
-      parsedResult = {
-        name: 'Detected Product',
-        category: 'packaged',
-        quantity: 1,
-        unit: 'pack',
-        expiry: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
-        ingredients: ['Wheat flour', 'Sugar', 'Salt', 'Palm oil'],
-        nutrition: { calories: 410, protein: 6, carbs: 72, fat: 11 },
-        is_demo: true
-      };
-      renderResults(parsedResult);
-      if (btn) btn.disabled = false;
-    }, 1200);
+  function showError(msg) {
+    var loading = find('scanLoadingState');
+    if (loading) loading.hidden = true;
+
+    var errorState = find('scanErrorState');
+    var errorText = find('scanErrorText');
+    if (errorText) errorText.textContent = msg || 'Scan failed. Please try again.';
+    if (errorState) errorState.hidden = false;
   }
 
   function renderResults(r) {
-    var results = find('scannerResults', 'scanResults', 'results');
-    if (!results) return;
+    var loading = find('scanLoadingState');
+    if (loading) loading.hidden = true;
 
-    var ingHtml = r.ingredients.map(function (i) {
-      return '<span class="badge badge-muted" style="margin:3px">' + layout.escapeHtml(i) + '</span>';
-    }).join('');
+    var errorState = find('scanErrorState');
+    if (errorState) errorState.hidden = true;
 
-    results.innerHTML = ''
-      + '<div style="padding:20px">'
-      +   '<h3 style="margin-top:0">' + layout.escapeHtml(r.name) + '</h3>'
-      +   '<p class="card-sub">Category: ' + layout.escapeHtml(r.category) + ' · Suggested expiry: ' + layout.escapeHtml(r.expiry) + '</p>'
+    /* Populate the form fields from scanResultForm */
+    var form = find('scanResultForm');
+    if (form) {
+      form.hidden = false;
 
-      +   '<h4 style="margin-top:20px">Detected ingredients</h4>'
-      +   '<div>' + ingHtml + '</div>'
+      var nameEl = find('scanProductName');
+      if (nameEl) nameEl.value = r.name;
 
-      +   '<h4 style="margin-top:20px">Nutrition (per serving)</h4>'
-      +   '<ul class="mini-list">'
-      +     '<li><span class="meta-label">Calories</span><span class="meta-value">' + r.nutrition.calories + ' kcal</span></li>'
-      +     '<li><span class="meta-label">Protein</span><span class="meta-value">' + r.nutrition.protein + ' g</span></li>'
-      +     '<li><span class="meta-label">Carbs</span><span class="meta-value">' + r.nutrition.carbs + ' g</span></li>'
-      +     '<li><span class="meta-label">Fat</span><span class="meta-value">' + r.nutrition.fat + ' g</span></li>'
-      +   '</ul>'
+      var ingEl = find('scanIngredients');
+      if (ingEl) ingEl.value = (r.ingredients || []).join('\n');
 
-      +   '<div class="alert alert-warn" style="margin-top:20px">'
-      +     '<i data-lucide="alert-triangle"></i>'
-      +     '<div><strong>Demo result.</strong> Confirm ingredients manually before saving.</div>'
-      +   '</div>'
+      var allergenEl = find('scanAllergens');
+      if (allergenEl) {
+        allergenEl.value = (r.allergen_conflicts || []).join(', ');
+      }
 
-      +   '<div style="margin-top:20px;display:flex;gap:10px">'
-      +     '<button class="btn btn-primary" id="confirmAddBtn"><i data-lucide="check"></i> Add to Pantry</button>'
-      +     '<button class="btn btn-ghost" id="resetScanBtn"><i data-lucide="rotate-ccw"></i> Rescan</button>'
-      +   '</div>'
-      + '</div>';
+      var nutritionEl = find('scanNutrition');
+      if (nutritionEl) nutritionEl.value = '';
+    }
+
+    /* Show allergen warning prominently */
+    if (r.allergen_conflicts && r.allergen_conflicts.length) {
+      layout.toast('Allergen conflict detected: ' + r.allergen_conflicts.join(', '), 'warn');
+    }
 
     if (window.lucide) lucide.createIcons();
 
-    var addBtn = document.getElementById('confirmAddBtn');
-    if (addBtn) addBtn.addEventListener('click', addToPantry);
+    /* Wire the Add to Pantry button inside the form */
+    var addBtn = find('addScannedToPantry');
+    if (addBtn) {
+      addBtn.onclick = addToPantry;
+    }
 
-    var resetBtn = document.getElementById('resetScanBtn');
-    if (resetBtn) resetBtn.addEventListener('click', clearPreview);
+    var discardBtn = find('discardScan');
+    if (discardBtn) {
+      discardBtn.onclick = clearPreview;
+    }
   }
 
   function addToPantry() {
-    if (!parsedResult) { layout.toast('Scan a product first.', 'warn'); return; }
+    if (!parsedResult) {
+      layout.toast('Scan a product first.', 'warn');
+      return;
+    }
+
+    var nameEl = find('scanProductName');
+    var ingEl  = find('scanIngredients');
+
+    var name = nameEl ? nameEl.value.trim() : parsedResult.name;
+    var ingredients = ingEl ? ingEl.value.split('\n').filter(function(l){return l.trim();}) : parsedResult.ingredients;
+
+    if (!name) {
+      layout.toast('Please enter a product name.', 'warn');
+      return;
+    }
+
     if (!api.pantry || !api.pantry.create) {
       layout.toast('Pantry service unavailable.', 'error');
       return;
     }
+
     api.pantry.create({
-      name:     parsedResult.name,
+      name: name,
       category: parsedResult.category,
       quantity: parsedResult.quantity,
-      unit:     parsedResult.unit,
-      expiry:   parsedResult.expiry
+      unit: parsedResult.unit,
+      expiry: parsedResult.expiry
     }).then(function () {
       layout.toast('Added to pantry.', 'success');
       setTimeout(function () { location.href = 'pantry.html'; }, 800);
@@ -229,7 +282,6 @@
     });
   }
 
-  /* Expose with multiple names in case your HTML calls a different one */
   Z.scanner = { init: init };
   Z.foodScanner = { init: init };
 })();
