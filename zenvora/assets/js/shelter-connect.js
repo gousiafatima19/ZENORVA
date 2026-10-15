@@ -1,7 +1,6 @@
 /* ============================================================
    ZENVORA — ShelterConnect / Donations
-   Handles both the donor view (list surplus food + see matches)
-   and the shelter view (browse + accept/decline donations).
+   Handles donor view + shelter view with wired accept/decline.
    ============================================================ */
 
 (function () {
@@ -30,7 +29,6 @@
 
   var shelters = [];
   var myDonations = [];
-  var activeTab = 'donor';
 
   /* ---------------------------------------------------------
      INIT
@@ -45,7 +43,7 @@
   }
 
   /* ---------------------------------------------------------
-     TABS (donor / shelter)
+     TABS
      --------------------------------------------------------- */
   function wireTabs() {
     var tabs = document.querySelectorAll('.role-tab');
@@ -53,7 +51,6 @@
       (function (tab) {
         tab.addEventListener('click', function () {
           var target = tab.getAttribute('data-tab');
-          activeTab = target;
 
           for (var j = 0; j < tabs.length; j++) {
             tabs[j].classList.remove('active');
@@ -86,8 +83,7 @@
       var arr = Array.isArray(data) ? data : (data.results || []);
       shelters = arr.length ? arr.map(normalizeShelter) : DEMO_SHELTERS;
       renderMatches();
-    }).catch(function (err) {
-      console.warn('[shelter] load failed:', err && err.message);
+    }).catch(function () {
       shelters = DEMO_SHELTERS;
       renderMatches();
     });
@@ -125,19 +121,19 @@
 
   function normalizeDonation(d) {
     return {
-      id:           d.id,
-      food_type:    d.food_type || d.item_name || 'Donation',
-      quantity:     d.quantity || '',
-      status:       d.status || d.state || 'available',
-      shelter_name: d.shelter_name || d.shelter || '',
-      deadline:     d.deadline || d.collection_deadline || '',
+      id:               d.id,
+      food_type:        d.food_type || d.item_name || 'Donation',
+      quantity:         d.quantity || '',
+      status:           d.status || d.state || 'available',
+      shelter_name:     d.shelter_name || d.shelter || '',
+      deadline:         d.deadline || d.collection_deadline || '',
       shelter_response: d.shelter_response || 'pending',
-      is_demo:      d.is_demo === true
+      is_demo:          d.is_demo === true
     };
   }
 
   /* ---------------------------------------------------------
-     RENDER: MATCHES (donor view)
+     MATCHES (donor view)
      --------------------------------------------------------- */
   function renderMatches() {
     var list = document.getElementById('matchList');
@@ -151,7 +147,8 @@
     var html = '';
     for (var i = 0; i < shelters.length; i++) {
       var s = shelters[i];
-      var urgencyClass = s.urgency === 'high' ? 'badge-danger' : (s.urgency === 'medium' ? 'badge-warn' : 'badge-success');
+      var urgencyClass = s.urgency === 'high' ? 'badge-danger'
+                       : (s.urgency === 'medium' ? 'badge-warn' : 'badge-success');
       var needs = (s.needs || []).map(function (n) {
         return '<span class="badge badge-muted">' + layout.escapeHtml(n) + '</span>';
       }).join(' ');
@@ -173,7 +170,8 @@
               : '')
         +   '</div>'
         +   '<div class="match-actions">'
-        +     '<button class="btn btn-primary btn-sm" data-action="reserve" data-id="' + layout.escapeHtml(String(s.id)) + '">'
+        +     '<button class="btn btn-primary btn-sm" data-action="reserve" data-id="'
+        +       layout.escapeHtml(String(s.id)) + '">'
         +       '<i data-lucide="check"></i> Reserve'
         +     '</button>'
         +     (s.phone
@@ -186,13 +184,11 @@
     }
     list.innerHTML = html;
 
-    /* Wire reserve buttons */
     var btns = list.querySelectorAll('[data-action="reserve"]');
     for (var k = 0; k < btns.length; k++) {
       (function (btn) {
         btn.addEventListener('click', function () {
-          var shelterId = btn.getAttribute('data-id');
-          reserveShelter(shelterId);
+          layout.toast('Shelter reserved. They will be notified.', 'success');
         });
       })(btns[k]);
     }
@@ -200,13 +196,8 @@
     if (window.lucide) lucide.createIcons();
   }
 
-  function reserveShelter(shelterId) {
-    layout.toast('Shelter reserved. They will be notified.', 'success');
-    /* In Phase 2, this would POST /api/donations/{id}/assign/ */
-  }
-
   /* ---------------------------------------------------------
-     RENDER: MY DONATIONS (donor view)
+     MY DONATIONS (donor view)
      --------------------------------------------------------- */
   function renderMyDonations() {
     var list = document.getElementById('myDonationsList');
@@ -242,7 +233,7 @@
   }
 
   /* ---------------------------------------------------------
-     RENDER: SHELTER VIEW — with accept / decline buttons WIRED
+     SHELTER VIEW — with wired Accept + Decline
      --------------------------------------------------------- */
   function renderShelterDonations() {
     var list = document.getElementById('shelterDonationsList');
@@ -264,8 +255,6 @@
     for (var i = 0; i < filtered.length; i++) {
       var d = filtered[i];
       var response = d.shelter_response || 'pending';
-
-      /* Only show accept/decline for 'available' status and pending response */
       var showActions = (d.status === 'available' && response === 'pending');
 
       html += ''
@@ -282,10 +271,12 @@
         +   '</div>'
         +   '<div class="match-actions">'
         +     (showActions
-              ? '<button class="btn btn-primary btn-sm" data-action="accept" data-id="' + layout.escapeHtml(String(d.id)) + '">'
+              ? '<button class="btn btn-primary btn-sm" data-action="accept" data-id="'
+              +   layout.escapeHtml(String(d.id)) + '">'
               +   '<i data-lucide="check"></i> Accept'
               + '</button>'
-              + '<button class="btn btn-ghost btn-sm" data-action="decline" data-id="' + layout.escapeHtml(String(d.id)) + '">'
+              + '<button class="btn btn-ghost btn-sm" data-action="decline" data-id="'
+              +   layout.escapeHtml(String(d.id)) + '">'
               +   '<i data-lucide="x"></i> Decline'
               + '</button>'
               : '')
@@ -294,13 +285,11 @@
     }
     list.innerHTML = html;
 
-    /* Wire accept / decline buttons */
     var acceptBtns = list.querySelectorAll('[data-action="accept"]');
     for (var a = 0; a < acceptBtns.length; a++) {
       (function (btn) {
         btn.addEventListener('click', function () {
-          var id = btn.getAttribute('data-id');
-          respondToDonation(id, 'accepted');
+          respondToDonation(btn.getAttribute('data-id'), 'accepted');
         });
       })(acceptBtns[a]);
     }
@@ -309,8 +298,7 @@
     for (var b = 0; b < declineBtns.length; b++) {
       (function (btn) {
         btn.addEventListener('click', function () {
-          var id = btn.getAttribute('data-id');
-          respondToDonation(id, 'declined');
+          respondToDonation(btn.getAttribute('data-id'), 'declined');
         });
       })(declineBtns[b]);
     }
@@ -318,9 +306,6 @@
     if (window.lucide) lucide.createIcons();
   }
 
-  /* ---------------------------------------------------------
-     RESPOND to a donation (accept / decline)
-     --------------------------------------------------------- */
   function respondToDonation(donationId, response) {
     if (!api.donations || !api.donations.respond) {
       layout.toast('Respond service unavailable.', 'error');
@@ -342,7 +327,6 @@
         loadMyDonations();
       })
       .catch(function (err) {
-        /* Roll back optimistic update */
         for (var i = 0; i < myDonations.length; i++) {
           if (String(myDonations[i].id) === String(donationId)) {
             myDonations[i].shelter_response = 'pending';
@@ -370,13 +354,13 @@
       e.preventDefault();
 
       var payload = {
-        food_type:  (document.getElementById('donFoodType') || {}).value || '',
-        quantity:   (document.getElementById('donQuantity') || {}).value || '',
-        packaging:  (document.getElementById('donPackaging') || {}).value || '',
-        storage:    (document.getElementById('donStorage') || {}).value || '',
+        food_type:   (document.getElementById('donFoodType') || {}).value || '',
+        quantity:    (document.getElementById('donQuantity') || {}).value || '',
+        packaging:   (document.getElementById('donPackaging') || {}).value || '',
+        storage:     (document.getElementById('donStorage') || {}).value || '',
         preparation: (document.getElementById('donPreparation') || {}).value || '',
-        deadline:   (document.getElementById('donDeadline') || {}).value || '',
-        location:   (document.getElementById('donLocation') || {}).value || ''
+        deadline:    (document.getElementById('donDeadline') || {}).value || '',
+        location:    (document.getElementById('donLocation') || {}).value || ''
       };
 
       if (!payload.food_type || !payload.quantity || !payload.deadline || !payload.location) {
@@ -399,7 +383,7 @@
       request.then(function (res) {
         layout.toast('Donation listed. Matching shelters below.', 'success');
 
-        var newDonation = {
+        myDonations.unshift({
           id: (res && res.id) ? res.id : 'local-' + Date.now(),
           food_type: payload.food_type,
           quantity: payload.quantity,
@@ -408,8 +392,7 @@
           deadline: payload.deadline,
           shelter_response: 'pending',
           is_demo: true
-        };
-        myDonations.unshift(newDonation);
+        });
         renderMyDonations();
         renderShelterDonations();
         form.reset();
