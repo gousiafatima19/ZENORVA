@@ -1,6 +1,5 @@
 /* ============================================================
    ZENVORA — Dashboard
-   Loads real data from the backend.
    ============================================================ */
 
 (function () {
@@ -9,9 +8,6 @@
   const { api, layout, auth } = window.ZENVORA;
   let weeklyChartInstance = null;
 
-  /* ---------------------------------------------------------
-     Helpers
-     --------------------------------------------------------- */
   function setText(id, text) {
     const el = document.getElementById(id);
     if (el) el.textContent = text == null ? '' : String(text);
@@ -56,9 +52,6 @@
     return 'Good evening';
   }
 
-  /* ---------------------------------------------------------
-     Stat cards
-     --------------------------------------------------------- */
   async function loadPantryStats() {
     try {
       const items = await api.pantry.list();
@@ -140,16 +133,13 @@
       return '<li class="mini-item">'
         + '<div class="mini-main">'
         +   '<strong>' + layout.escapeHtml(i.name) + '</strong>'
-        +   '<span class="mini-sub">' + layout.escapeHtml(String(i.quantity == null ? '' : i.quantity)) + ' ' + layout.escapeHtml(i.unit || '') + ' · added ' + layout.formatDate(i.createdAt) + '</span>'
+        +   '<span class="mini-sub">' + layout.escapeHtml(String(i.quantity == null ? '' : i.quantity)) + ' ' + layout.escapeHtml(i.unit || '') + ' - added ' + layout.formatDate(i.createdAt) + '</span>'
         + '</div>'
         + '<span class="badge badge-' + b.cls + '">' + b.label + '</span>'
         + '</li>';
     }).join('');
   }
 
-  /* ---------------------------------------------------------
-     Notifications
-     --------------------------------------------------------- */
   async function loadNotifications() {
     try {
       const data = await api.notifications();
@@ -172,9 +162,6 @@
     }
   }
 
-  /* ---------------------------------------------------------
-     Impact — FIXED to match API response structure
-     --------------------------------------------------------- */
   async function loadImpact() {
     try {
       const data = await api.impact();
@@ -195,9 +182,6 @@
     }
   }
 
-  /* ---------------------------------------------------------
-     Suggested recipes
-     --------------------------------------------------------- */
   async function loadRecipes() {
     const box = document.getElementById('suggestedRecipes');
     if (!box) return;
@@ -242,9 +226,6 @@
     }
   }
 
-  /* ---------------------------------------------------------
-     Nearby shelters
-     --------------------------------------------------------- */
   async function loadNearby() {
     const box = document.getElementById('nearbyList');
     if (!box) return;
@@ -274,9 +255,6 @@
     }
   }
 
-  /* ---------------------------------------------------------
-     Donations preview
-     --------------------------------------------------------- */
   async function loadDonations() {
     const box = document.getElementById('donationsPreview');
     if (!box) return;
@@ -304,9 +282,6 @@
     }
   }
 
-  /* ---------------------------------------------------------
-     Shopping list preview
-     --------------------------------------------------------- */
   async function loadShoppingList() {
     const box = document.getElementById('shoppingListPreview');
     const summary = document.getElementById('shoppingSummary');
@@ -340,9 +315,6 @@
     }
   }
 
-  /* ---------------------------------------------------------
-     Weekly chart
-     --------------------------------------------------------- */
   async function loadWeeklyChart() {
     const canvas = document.getElementById('weeklyChart');
     if (!canvas || !window.Chart) return;
@@ -388,9 +360,6 @@
     }
   }
 
-  /* ---------------------------------------------------------
-     Welcome
-     --------------------------------------------------------- */
   function loadWelcome() {
     const title = document.getElementById('welcomeTitle');
     const initialsEl = document.getElementById('avatarInitials');
@@ -400,9 +369,6 @@
     if (initialsEl) initialsEl.textContent = initials();
   }
 
-  /* ---------------------------------------------------------
-     Init
-     --------------------------------------------------------- */
   function init() {
     loadWelcome();
     loadPantryStats();
