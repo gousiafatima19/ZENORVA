@@ -19,7 +19,6 @@
     { id: 4, title: 'Cook timer finished',       body: 'Your step timer just completed.',            time: '3 days ago', type: 'cooking',   is_read: true,  is_demo: true }
   ];
 
-  /* ---- Init (both names work) ---- */
   function init() {
     wireTabs();
     wireMarkAll();
@@ -40,11 +39,12 @@
   }
 
   function normalize(n) {
+    var rawTime = n.created_at || n.time || '';
     return {
       id:      n.id,
       title:   n.title || n.subject || 'Notification',
       body:    n.body  || n.message || '',
-      time:    n.time  || n.created_at || '',
+      time:    layout.timeAgo(rawTime) || rawTime,
       type:    n.type  || n.category || 'system',
       is_read: n.is_read === true || n.read === true,
       is_demo: n.is_demo === true
@@ -62,7 +62,6 @@
           }
           tab.classList.add('active');
           tab.setAttribute('aria-selected', 'true');
-          /* Your HTML uses data-cat; some versions use data-filter — support both */
           filter = tab.getAttribute('data-cat') || tab.getAttribute('data-filter') || 'all';
           render();
         });
@@ -72,10 +71,25 @@
 
   function wireMarkAll() {
     var btn = document.getElementById('markAllReadBtn');
-    if (btn) btn.addEventListener('click', function () {
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var unread = all.filter(function (n) { return !n.is_read && !n.is_demo; });
+
+      /* Optimistic UI update */
       all = all.map(function (n) { n.is_read = true; return n; });
       render();
-      layout.toast('All notifications marked as read.', 'success');
+
+      /* Persist to backend */
+      if (!api.markRead) {
+        layout.toast('All notifications marked as read.', 'success');
+        return;
+      }
+
+      Promise.all(unread.map(function (n) {
+        return api.markRead(n.id).catch(function () { return null; });
+      })).then(function () {
+        layout.toast('All notifications marked as read.', 'success');
+      });
     });
   }
 
@@ -111,10 +125,30 @@
             + '</li>';
     }
     wrap.innerHTML = html;
+
+    /* Wire per-notification click to mark as read */
+    var items = wrap.querySelectorAll('.notif-item');
+    for (var k = 0; k < items.length; k++) {
+      (function (el, idx) {
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function () {
+          var n = list[idx];
+          if (n.is_read) return;
+
+          n.is_read = true;
+          el.classList.remove('unread');
+
+          if (api.markRead && !n.is_demo) {
+            api.markRead(n.id).catch(function () { /* silent */ });
+          }
+        });
+      })(items[k], k);
+    }
+
     if (window.lucide) lucide.createIcons();
   }
 
-  /* Expose BOTH init() and initPage() — your HTML calls initPage */
+  /* Expose BOTH names (HTML may call either) */
   Z.notifications = {
     init: init,
     initPage: init
