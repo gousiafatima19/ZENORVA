@@ -38,13 +38,13 @@ def identify_ingredients(image_bytes, mime_type='image/jpeg'):
     """
     api_key = os.getenv('GEMINI_API_KEY', '').strip()
     if not api_key:
-        logger.info('GEMINI_API_KEY not set — image recognition disabled')
+        logger.info('GEMINI_API_KEY not set - image recognition disabled')
         return None
 
     try:
         import google.generativeai as genai
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.0-flash')
 
         response = model.generate_content([
             VISION_PROMPT,
