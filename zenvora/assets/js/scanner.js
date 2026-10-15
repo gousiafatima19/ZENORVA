@@ -1,7 +1,6 @@
 /* ============================================================
    ZENVORA — Food Scanner
    Sends image to backend Gemini Vision endpoint.
-   Falls back to manual ingredient entry if unavailable.
    ============================================================ */
 
 (function () {
@@ -14,7 +13,6 @@
   var selectedFile = null;
   var parsedResult = null;
 
-  /* ---------- Helper: find element by any of several IDs ---------- */
   function find() {
     var args = Array.prototype.slice.call(arguments);
     for (var i = 0; i < args.length; i++) {
@@ -115,7 +113,6 @@
   }
 
   function wireActions() {
-    /* SCAN BUTTON — triggers the actual backend call */
     var scanBtn = find('scanBtn', 'scanProductBtn', 'scanImageBtn');
     if (scanBtn) {
       scanBtn.addEventListener('click', function () {
@@ -146,7 +143,6 @@
 
     showLoading();
 
-    /* ---- CALL THE REAL BACKEND ---- */
     Z.api.scan.image(selectedFile)
       .then(function (result) {
         parsedResult = {
@@ -207,7 +203,6 @@
     var errorState = find('scanErrorState');
     if (errorState) errorState.hidden = true;
 
-    /* Populate the form fields from scanResultForm */
     var form = find('scanResultForm');
     if (form) {
       form.hidden = false;
@@ -219,31 +214,23 @@
       if (ingEl) ingEl.value = (r.ingredients || []).join('\n');
 
       var allergenEl = find('scanAllergens');
-      if (allergenEl) {
-        allergenEl.value = (r.allergen_conflicts || []).join(', ');
-      }
+      if (allergenEl) allergenEl.value = (r.allergen_conflicts || []).join(', ');
 
       var nutritionEl = find('scanNutrition');
       if (nutritionEl) nutritionEl.value = '';
     }
 
-    /* Show allergen warning prominently */
     if (r.allergen_conflicts && r.allergen_conflicts.length) {
       layout.toast('Allergen conflict detected: ' + r.allergen_conflicts.join(', '), 'warn');
     }
 
     if (window.lucide) lucide.createIcons();
 
-    /* Wire the Add to Pantry button inside the form */
     var addBtn = find('addScannedToPantry');
-    if (addBtn) {
-      addBtn.onclick = addToPantry;
-    }
+    if (addBtn) addBtn.onclick = addToPantry;
 
     var discardBtn = find('discardScan');
-    if (discardBtn) {
-      discardBtn.onclick = clearPreview;
-    }
+    if (discardBtn) discardBtn.onclick = clearPreview;
   }
 
   function addToPantry() {
