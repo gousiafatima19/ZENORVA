@@ -1,6 +1,6 @@
 /* ============================================================
    ZENVORA — ShelterConnect / Donations
-   Handles donor view + shelter view with wired accept/decline.
+   Donor view + shelter view with wired accept/decline.
    ============================================================ */
 
 (function () {
@@ -10,9 +10,6 @@
   var api = Z.api;
   var layout = Z.layout;
 
-  /* ---------------------------------------------------------
-     DEMO FALLBACKS (only used if backend unreachable)
-     --------------------------------------------------------- */
   var DEMO_SHELTERS = [
     { id: 's1', name: 'Hope Shelter', address: 'MG Road, Bengaluru', distanceKm: 2.3,
       phone: '+91 90000 11111', needs: ['Cooked meals', 'Fruits'], urgency: 'high', is_demo: true },
@@ -30,9 +27,6 @@
   var shelters = [];
   var myDonations = [];
 
-  /* ---------------------------------------------------------
-     INIT
-     --------------------------------------------------------- */
   function init() {
     wireTabs();
     wireDonationForm();
@@ -42,9 +36,6 @@
     loadMyDonations();
   }
 
-  /* ---------------------------------------------------------
-     TABS
-     --------------------------------------------------------- */
   function wireTabs() {
     var tabs = document.querySelectorAll('.role-tab');
     for (var i = 0; i < tabs.length; i++) {
@@ -70,9 +61,6 @@
     }
   }
 
-  /* ---------------------------------------------------------
-     LOAD SHELTERS
-     --------------------------------------------------------- */
   function loadShelters() {
     if (!api.shelters) {
       shelters = DEMO_SHELTERS;
@@ -102,9 +90,6 @@
     };
   }
 
-  /* ---------------------------------------------------------
-     LOAD MY DONATIONS
-     --------------------------------------------------------- */
   function loadMyDonations() {
     if (!api.get) return;
     api.get('/api/donations/').then(function (data) {
@@ -132,9 +117,6 @@
     };
   }
 
-  /* ---------------------------------------------------------
-     MATCHES (donor view)
-     --------------------------------------------------------- */
   function renderMatches() {
     var list = document.getElementById('matchList');
     if (!list) return;
@@ -163,7 +145,7 @@
         +     '</div>'
         +     '<p class="match-item-sub">'
         +       (s.address ? layout.escapeHtml(s.address) : '')
-        +       (s.distanceKm != null ? ' · ' + s.distanceKm + ' km' : '')
+        +       (s.distanceKm != null ? ' - ' + s.distanceKm + ' km' : '')
         +     '</p>'
         +     (s.needs && s.needs.length
               ? '<div class="match-reasons">' + needs + '</div>'
@@ -196,9 +178,6 @@
     if (window.lucide) lucide.createIcons();
   }
 
-  /* ---------------------------------------------------------
-     MY DONATIONS (donor view)
-     --------------------------------------------------------- */
   function renderMyDonations() {
     var list = document.getElementById('myDonationsList');
     if (!list) return;
@@ -222,7 +201,7 @@
         +     '<p class="mini-title">' + layout.escapeHtml(d.food_type) + '</p>'
         +     '<p class="mini-sub">'
         +       layout.escapeHtml(d.quantity || '')
-        +       (d.shelter_name ? ' · ' + layout.escapeHtml(d.shelter_name) : '')
+        +       (d.shelter_name ? ' - ' + layout.escapeHtml(d.shelter_name) : '')
         +     '</p>'
         +   '</div>'
         +   '<span class="badge ' + statusClass + '">' + layout.escapeHtml(d.status) + '</span>'
@@ -232,9 +211,6 @@
     if (window.lucide) lucide.createIcons();
   }
 
-  /* ---------------------------------------------------------
-     SHELTER VIEW — with wired Accept + Decline
-     --------------------------------------------------------- */
   function renderShelterDonations() {
     var list = document.getElementById('shelterDonationsList');
     if (!list) return;
@@ -263,7 +239,7 @@
         +     '<h3 class="match-item-title">' + layout.escapeHtml(d.food_type) + '</h3>'
         +     '<p class="match-item-sub">'
         +       layout.escapeHtml(d.quantity || '')
-        +       (d.deadline ? ' · deadline ' + layout.escapeHtml(d.deadline) : '')
+        +       (d.deadline ? ' - deadline ' + layout.escapeHtml(d.deadline) : '')
         +     '</p>'
         +     (response !== 'pending'
               ? '<p class="mini-sub">Response: <strong>' + layout.escapeHtml(response) + '</strong></p>'
@@ -312,7 +288,6 @@
       return;
     }
 
-    /* Optimistic update */
     for (var i = 0; i < myDonations.length; i++) {
       if (String(myDonations[i].id) === String(donationId)) {
         myDonations[i].shelter_response = response;
@@ -343,9 +318,6 @@
     if (el) el.addEventListener('change', renderShelterDonations);
   }
 
-  /* ---------------------------------------------------------
-     DONATION FORM
-     --------------------------------------------------------- */
   function wireDonationForm() {
     var form = document.getElementById('donationForm');
     if (!form) return;
