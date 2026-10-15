@@ -10,11 +10,11 @@
   var layout = Z.layout;
 
   var DEMO_SHOPS = [
-    { id: 's1', name: 'Green Grocer', category: 'vegetables', price: 40, unitPrice: '₹20/kg',
+    { id: 's1', name: 'Green Grocer', category: 'vegetables', price: 40, unitPrice: 'Rs.20/kg',
       discount: '10% off', distanceKm: 0.8, product: 'Tomatoes', demo: true },
-    { id: 's2', name: 'Fresh Mart', category: 'fruits', price: 120, unitPrice: '₹60/kg',
+    { id: 's2', name: 'Fresh Mart', category: 'fruits', price: 120, unitPrice: 'Rs.60/kg',
       discount: '', distanceKm: 1.6, product: 'Apples', demo: true },
-    { id: 's3', name: 'Daily Dairy', category: 'dairy', price: 32, unitPrice: '₹32/L',
+    { id: 's3', name: 'Daily Dairy', category: 'dairy', price: 32, unitPrice: 'Rs.32/L',
       discount: '5% off', distanceKm: 2.1, product: 'Milk', demo: true }
   ];
 
@@ -25,14 +25,12 @@
   };
   var viewMode = 'grid';
 
-  /* ---------- INIT ---------- */
   function init() {
     wireFilters();
     wireViewToggle();
     load();
   }
 
-  /* ---------- LOAD ---------- */
   function load() {
     if (!api.shops || !api.shops.list) {
       allShops = DEMO_SHOPS;
@@ -50,7 +48,6 @@
     });
   }
 
-  /* ---------- RENDER ---------- */
   function render() {
     var wrap = document.getElementById('shopResults');
     if (!wrap) return;
@@ -99,8 +96,8 @@
   }
 
   function shopCard(s) {
-    var price = s.price != null ? '₹' + s.price : '';
-    var was = s.originalPrice ? '₹' + s.originalPrice : '';
+    var price = s.price != null ? 'Rs.' + s.price : '';
+    var was = s.originalPrice ? 'Rs.' + s.originalPrice : '';
     var safeName = layout.escapeHtml(s.name || 'Shop');
     var safeId = layout.escapeHtml(String(s.id));
 
@@ -109,8 +106,13 @@
     if (s.category) meta += '<span><i data-lucide="tag"></i> ' + layout.escapeHtml(s.category) + '</span>';
     if (s.demo) meta += '<span class="badge badge-muted">demo</span>';
 
-    var product = s.product ? '<p style="margin:0 0 8px;font-weight:600;color:var(--zv-forest)">' + layout.escapeHtml(s.product) + '</p>' : '';
-    var discount = s.discount ? '<span class="badge badge-gold" style="margin-bottom:10px">' + layout.escapeHtml(s.discount) + '</span>' : '';
+    var product = s.product
+      ? '<p style="margin:0 0 8px;font-weight:600;color:var(--zv-forest)">' + layout.escapeHtml(s.product) + '</p>'
+      : '';
+
+    var discount = s.discount
+      ? '<span class="badge badge-gold" style="margin-bottom:10px">' + layout.escapeHtml(s.discount) + '</span>'
+      : '';
 
     return ''
       + '<article class="shop-card">'
@@ -138,7 +140,6 @@
       + '</article>';
   }
 
-  /* ---------- FILTERS ---------- */
   function wireFilters() {
     var s = document.getElementById('shopSearch');
     var g = document.getElementById('globalSearch');
@@ -188,7 +189,6 @@
     }
   }
 
-  /* ---------- VIEW TOGGLE ---------- */
   function wireViewToggle() {
     var g = document.getElementById('viewGridView');
     var l = document.getElementById('viewListView');
