@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Donations Â· ZENVORA</title>
+  <title>Donations · ZENVORA</title>
   <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
   <link rel="stylesheet" href="/assets/css/style.css" />
   <link rel="stylesheet" href="/assets/css/responsive.css" />
@@ -12,12 +12,13 @@
 <body>
 
 <div class="app" id="appShell">
-  <!-- SIDEBAR (Donations active) -->
+
   <aside class="sidebar" id="sidebar" aria-label="Primary">
     <div class="sidebar-brand">
       <img src="/assets/images/favicon.png" alt="" />
       <span class="brand-text">ZENVORA</span>
     </div>
+
     <nav>
       <p class="nav-section-label">Main</p>
       <ul class="nav-list">
@@ -27,6 +28,7 @@
         <li><a class="nav-item" href="recipes.html"><span class="nav-icon"><i data-lucide="chef-hat"></i></span><span class="nav-label">Recipes</span></a></li>
         <li><a class="nav-item" href="dietary-profile.html"><span class="nav-icon"><i data-lucide="leaf"></i></span><span class="nav-label">Dietary Profile</span></a></li>
       </ul>
+
       <p class="nav-section-label">Discover</p>
       <ul class="nav-list">
         <li><a class="nav-item" href="shops.html"><span class="nav-icon"><i data-lucide="store"></i></span><span class="nav-label">Shop &amp; Offers</span></a></li>
@@ -34,6 +36,7 @@
         <li><a class="nav-item" href="shelter-connect.html"><span class="nav-icon"><i data-lucide="hand-heart"></i></span><span class="nav-label">ShelterConnect</span></a></li>
         <li><a class="nav-item active" href="donations.html"><span class="nav-icon"><i data-lucide="gift"></i></span><span class="nav-label">Donations</span></a></li>
       </ul>
+
       <p class="nav-section-label">Tools</p>
       <ul class="nav-list">
         <li><a class="nav-item" href="smart-cook.html"><span class="nav-icon"><i data-lucide="flame"></i></span><span class="nav-label">Smart Cook Mode</span></a></li>
@@ -41,6 +44,7 @@
         <li><a class="nav-item" href="notifications.html"><span class="nav-icon"><i data-lucide="bell"></i></span><span class="nav-label">Notifications</span></a></li>
         <li><a class="nav-item" href="impact.html"><span class="nav-icon"><i data-lucide="bar-chart-3"></i></span><span class="nav-label">Impact Dashboard</span></a></li>
       </ul>
+
       <p class="nav-section-label">Account</p>
       <ul class="nav-list">
         <li><a class="nav-item" href="settings.html"><span class="nav-icon"><i data-lucide="settings"></i></span><span class="nav-label">Settings</span></a></li>
@@ -48,22 +52,32 @@
         <li><a class="nav-item" href="#" id="logoutLink"><span class="nav-icon"><i data-lucide="log-out"></i></span><span class="nav-label">Logout</span></a></li>
       </ul>
     </nav>
+
     <div class="sidebar-footer">
       <button class="sidebar-collapse-btn" id="sidebarCollapse" aria-label="Collapse sidebar">
-        <i data-lucide="chevrons-left"></i><span class="nav-label">Collapse</span>
+        <i data-lucide="chevrons-left"></i>
+        <span class="nav-label">Collapse</span>
       </button>
     </div>
   </aside>
 
   <div class="main">
+
     <header class="topbar">
-      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu"><i data-lucide="menu"></i></button>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+        <i data-lucide="menu"></i>
+      </button>
       <h1 class="page-title">Donations</h1>
+
       <div class="topbar-actions">
-        <a href="shelter-connect.html" class="btn btn-primary btn-sm"><i data-lucide="plus"></i> New donation</a>
+        <a href="shelter-connect.html" class="btn btn-primary btn-sm">
+          <i data-lucide="plus"></i> New donation
+        </a>
         <button class="icon-btn" id="notifBell" aria-label="Notifications">
-          <i data-lucide="bell"></i><span class="icon-badge" id="notifBadge" hidden>0</span>
+          <i data-lucide="bell"></i>
+          <span class="icon-badge" id="notifBadge" hidden>0</span>
         </button>
+
         <div class="avatar-menu">
           <button class="avatar-btn" id="avatarBtn" aria-haspopup="true" aria-expanded="false">
             <span class="avatar" id="avatarInitials">ZK</span>
@@ -83,30 +97,32 @@
 
       <div id="connectionBanner" class="alert alert-warn" hidden>
         <i data-lucide="wifi-off"></i>
-        <div><strong>Donation service not connected.</strong>
-          Donation data requires the backend API.</div>
+        <div>
+          <strong>Donation service not connected.</strong>
+          Donation data requires the backend API.
+        </div>
       </div>
 
       <section class="stat-grid">
         <article class="stat-card">
           <div class="stat-icon stat-icon-info"><i data-lucide="package"></i></div>
           <p class="stat-label">Available</p>
-          <p class="stat-value" id="donStatAvailable">â€”</p>
+          <p class="stat-value" id="donStatAvailable">-</p>
         </article>
         <article class="stat-card">
           <div class="stat-icon stat-icon-warn"><i data-lucide="bookmark"></i></div>
           <p class="stat-label">Reserved</p>
-          <p class="stat-value" id="donStatReserved">â€”</p>
+          <p class="stat-value" id="donStatReserved">-</p>
         </article>
         <article class="stat-card">
           <div class="stat-icon stat-icon-gold"><i data-lucide="truck"></i></div>
           <p class="stat-label">Collected</p>
-          <p class="stat-value" id="donStatCollected">â€”</p>
+          <p class="stat-value" id="donStatCollected">-</p>
         </article>
         <article class="stat-card">
           <div class="stat-icon stat-icon-green"><i data-lucide="check-circle-2"></i></div>
           <p class="stat-label">Delivered</p>
-          <p class="stat-value" id="donStatDelivered">â€”</p>
+          <p class="stat-value" id="donStatDelivered">-</p>
         </article>
       </section>
 
@@ -119,7 +135,7 @@
         </div>
 
         <ul id="donationsList" class="mini-list">
-          <li class="empty-state">Loading donationsâ€¦</li>
+          <li class="empty-state">Loading donations...</li>
         </ul>
       </section>
 
