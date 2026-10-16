@@ -1,8 +1,7 @@
 /* ============================================================
    ZENVORA - Food Map (Leaflet)
    Tiles: Esri World Street Map (free, no API key)
-   Fallback chain: Esri -> OSM France -> OSM Germany
-   Debug override: ?tiles=esri | ?tiles=osm-fr | ?tiles=osm-de
+   Fallback: OSM France -> OSM Germany
    ============================================================ */
 
 (function () {
@@ -53,9 +52,7 @@
   var allLocations = [];
   var userLocation = null;
 
-  /* ---------------------------------------------------------
-     TILE PROVIDERS (free, no API key)
-     --------------------------------------------------------- */
+  /* ---------- TILE PROVIDERS (free, no API key) ---------- */
   var TILE_PROVIDERS = [
     {
       name: 'esri',
@@ -103,9 +100,7 @@
     });
   }
 
-  /* ---------------------------------------------------------
-     DEMO locations (used only when backend has no coordinates)
-     --------------------------------------------------------- */
+  /* ---------- DEMO LOCATIONS ---------- */
   var DEMO_LOCATIONS = [
     { id: 'sh1', type: 'shop',    name: 'Green Grocer',       address: 'MG Road, Bengaluru',       lat: 12.9757, lng: 77.6068, hours: '9am - 9pm',  phone: '+91 90000 11111', is_demo: true },
     { id: 'sh2', type: 'shop',    name: 'Fresh Bazaar',       address: 'Indiranagar, Bengaluru',   lat: 12.9784, lng: 77.6408, hours: '8am - 10pm', phone: '+91 90000 22222', is_demo: true },
@@ -123,9 +118,7 @@
     loadLocations();
   }
 
-  /* ---------------------------------------------------------
-     MAP SETUP
-     --------------------------------------------------------- */
+  /* ---------- MAP SETUP ---------- */
   function initMap() {
     var el = document.getElementById('foodMap');
     if (!el) return;
@@ -145,13 +138,10 @@
     var status = document.getElementById('mapStatus');
     if (status) status.hidden = true;
 
-    /* Force Leaflet to recalculate size (fixes blank map on desktop) */
     setTimeout(function () { if (map) map.invalidateSize(); }, 200);
   }
 
-  /* ---------------------------------------------------------
-     LOAD LOCATIONS
-     --------------------------------------------------------- */
+  /* ---------- LOAD LOCATIONS ---------- */
   function unwrap(data) {
     if (Array.isArray(data)) return data;
     if (data && Array.isArray(data.results)) return data.results;
@@ -203,9 +193,7 @@
     };
   }
 
-  /* ---------------------------------------------------------
-     PLOT MARKERS
-     --------------------------------------------------------- */
+  /* ---------- MARKERS ---------- */
   function plotMarkers(list) {
     if (!markerLayer) return;
     markerLayer.clearLayers();
@@ -233,9 +221,7 @@
     });
   }
 
-  /* ---------------------------------------------------------
-     FILTERS
-     --------------------------------------------------------- */
+  /* ---------- FILTERS ---------- */
   function wireFilters() {
     ['filterShops', 'filterShelters', 'filterPickup'].forEach(function (id) {
       var el = document.getElementById(id);
@@ -269,9 +255,7 @@
     renderList(filtered);
   }
 
-  /* ---------------------------------------------------------
-     LIST VIEW
-     --------------------------------------------------------- */
+  /* ---------- LIST ---------- */
   function renderList(list) {
     var ul = document.getElementById('mapList');
     if (!ul) return;
@@ -304,9 +288,7 @@
     });
   }
 
-  /* ---------------------------------------------------------
-     DETAIL PANEL
-     --------------------------------------------------------- */
+  /* ---------- DETAIL ---------- */
   function showDetail(loc) {
     var empty  = document.getElementById('mapSideEmpty');
     var detail = document.getElementById('mapSideDetail');
@@ -384,9 +366,7 @@
     });
   }
 
-  /* ---------------------------------------------------------
-     ACTIONS
-     --------------------------------------------------------- */
+  /* ---------- ACTIONS ---------- */
   function wireActions() {
     var locateBtn = document.getElementById('locateMeBtn');
     if (locateBtn) locateBtn.addEventListener('click', function () {
@@ -445,9 +425,7 @@
     }
   }
 
-  /* ---------------------------------------------------------
-     UTILS
-     --------------------------------------------------------- */
+  /* ---------- UTILS ---------- */
   function setText(id, v) {
     var el = document.getElementById(id);
     if (el) el.textContent = v == null ? '-' : String(v);
